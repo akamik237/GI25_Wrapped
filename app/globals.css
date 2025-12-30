@@ -1,26 +1,174 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Allotment styles */
+@import "allotment/dist/style.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove any potential decorative elements */
+*::before,
+*::after {
+  display: none !important;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ================================
+     CODE EDITOR BASE (VS CODE)
+     ================================ */
+  --color-editor-bg: 14 17 23;
+  /* Dark */
+  --color-editor-panel: 22 27 34;
+  /* Dark Grey */
+  --color-editor-line: 31 41 55;
+  /* Grey */
+  --color-editor-border: 48 54 61;
+  /* Grey */
+
+  /* ================================
+     SYNTAX HIGHLIGHTING (TEXT ONLY)
+     ================================ */
+  --color-syntax-keyword: 86 156 214;
+  /* Blue */
+  --color-syntax-function: 220 220 170;
+  /* Yellowish */
+  --color-syntax-variable: 156 220 254;
+  /* Light Blue */
+  --color-syntax-string: 206 145 120;
+  /* Orange */
+  --color-syntax-number: 181 206 168;
+  /* Light Green */
+  --color-syntax-comment: 106 153 85;
+  /* Green */
+  --color-syntax-type: 78 201 176;
+  /* Teal */
+  --color-syntax-error: 244 71 71;
+  /* Red */
+
+  /* ================================
+     ENSPY ACCENTS (INTERACTION)
+     ================================ */
+  --color-enspy-accent: 240 138 26;
+  /* Orange */
+  --color-enspy-success: 68 174 99;
+  /* Green */
+  --color-enspy-dark: 11 122 74;
+  /* Dark Green */
+
+  /* ================================
+     TEXT
+     ================================ */
+  --color-text-primary: 230 237 243;
+  /* White */
+  --color-text-muted: 125 133 144;
+  /* Grey */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #1E1E1E;
+  color: #D4D4D4;
+}
+
+/* Allotment custom styling for VS Code theme */
+.split-view-view {
+  background-color: #1E1E1E;
+}
+
+.sash {
+  background-color: #3C3C3C !important;
+}
+
+.sash:hover {
+  background-color: #007ACC !important;
+}
+
+.sash.horizontal {
+  height: 4px !important;
+  cursor: ns-resize !important;
+}
+
+.sash.vertical {
+  width: 4px !important;
+  cursor: ew-resize !important;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Smooth section transitions */
+  .section-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+
+  .fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards;
+  }
+
+  .slide-in-right {
+    animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
