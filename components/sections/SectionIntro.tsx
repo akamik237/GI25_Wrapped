@@ -135,14 +135,14 @@ export const SectionIntro = () => {
                     setCurrentView('Soutenances_Septembre.md');
                     setExtensionMode('none');
                     break;
-                case 9: // Top Femmes (Extension)
-                    setLayoutMode('extension');
-                    setExtensionMode('femmes');
-                    break;
-                case 10: // Mentions (Terminal)
+                case 9: // Mentions (Terminal)
                     setLayoutMode('terminal');
                     setCurrentView('main.ts');
                     setExtensionMode('none');
+                    break;
+                case 10: // Top Femmes (Extension)
+                    setLayoutMode('extension');
+                    setExtensionMode('femmes');
                     break;
                 case 11: // Top Hommes (Extension)
                     setLayoutMode('extension');
@@ -190,10 +190,10 @@ export const SectionIntro = () => {
     };
 
     const showExtensionPanel = extensionMode !== 'none';
-    const showTerminalPanel = (showTerminal && currentSection <= 2) || currentSection === 5 || currentSection === 10 || currentSection === 17;
+    const showTerminalPanel = (showTerminal && currentSection <= 2) || currentSection === 5 || currentSection === 9 || currentSection === 17;
     
     // Terminal size based on section type
-    const isFullTerminalSection = currentSection <= 2 || currentSection === 5 || currentSection === 10 || currentSection === 17;
+    const isFullTerminalSection = currentSection <= 2 || currentSection === 5 || currentSection === 9 || currentSection === 17;
     const terminalSize = isFullTerminalSection
         ? { preferredSize: 700, minSize: 500, maxSize: 900 }  // Full terminal sections - bigger (1, 2, 5, 10, 17)
         : { preferredSize: 400, minSize: 150, maxSize: 600 };  // Regular sections with code
@@ -422,7 +422,7 @@ export const SectionIntro = () => {
                                                 {currentSection === 5 && (
                                                     <EditorTerminalThemes onScrollEnd={handleScrollEnd} />
                                                 )}
-                                                {currentSection === 10 && (
+                                                {currentSection === 9 && (
                                                     <EditorTerminalMentions onScrollEnd={handleScrollEnd} />
                                                 )}
                                                 {currentSection === 17 && (

@@ -17,3 +17,4 @@ Photos and videos from the final wave of defenses in September 2025.
 - Videos: MP4/MOV
 - Optimized for web
 
+

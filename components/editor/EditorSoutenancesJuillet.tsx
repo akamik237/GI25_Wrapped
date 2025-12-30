@@ -3,6 +3,7 @@
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import { Badge, BadgeGroup } from '@/components/ui/Badge';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
@@ -91,21 +92,26 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
                 <h2 className="text-2xl font-bold text-[#00FFFF] mb-3">
                     # Soutenances de Juillet 2025
                 </h2>
+                
+                {/* Badges */}
+                <BadgeGroup>
+                    <Badge label="candidats" value="~45" colorScheme="green" />
+                    <Badge label="taux réussite" value="100%" colorScheme="green" />
+                    <Badge label="durée moyenne" value="45 min" colorScheme="blue" />
+                    <Badge label="période" value="juillet 2025" colorScheme="red" />
+                </BadgeGroup>
+                
                 <p className="text-[#CCCCCC] text-sm mb-3">
                     <span className="text-[#569CD6]">Période:</span> Juillet 2025 • <span className="text-[#569CD6]">Candidats:</span> Première vague (~45 étudiants)
                 </p>
-                <p className="text-[#CCCCCC] text-sm mb-3">
-                    <span className="text-[#569CD6]">Contexte:</span> Le lancement officiel des soutenances de fin d'études. Après des mois de stage intensif 
-                    et de rédaction de mémoires, les premiers étudiants se présentent devant le jury pour défendre leurs travaux de recherche et développement.
+                <p className="text-[#CCCCCC] text-sm mb-2">
+                    <span className="text-[#569CD6]">Contexte:</span> Lancement officiel des soutenances. Premiers étudiants devant le jury après des mois de stage et rédaction.
                 </p>
                 <p className="text-[#CCCCCC] text-sm mb-2">
-                    <span className="text-[#569CD6]">Ambiance:</span> Mélange d'excitation, d'appréhension et de fierté. C'est la dernière épreuve académique 
-                    avant l'obtention du diplôme d'ingénieur. Chaque présentation dure environ 45 minutes : 20 minutes de présentation, 20 minutes de questions 
-                    du jury, et 5 minutes de délibération.
+                    <span className="text-[#569CD6]">Ambiance:</span> Excitation et appréhension. Dernière épreuve avant le diplôme d'ingénieur. Présentations d'environ 45 minutes.
                 </p>
                 <p className="text-[#CCCCCC] text-sm">
-                    <span className="text-[#569CD6]">Résultats:</span> Taux de réussite de 100% • Premières mentions "Très Bien" et "Excellent" • 
-                    Ambiance de soutien remarquable entre camarades
+                    <span className="text-[#569CD6]">Résultats:</span> 100% de réussite. Premières mentions Très Bien et Excellent. Soutien remarquable entre camarades.
                 </p>
             </div>
 

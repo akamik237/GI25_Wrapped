@@ -27,3 +27,4 @@ These media will be displayed in a Swiper carousel in the SortiePromo section of
 - Team bonding
 - Videos of the outing
 
+

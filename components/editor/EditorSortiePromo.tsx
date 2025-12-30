@@ -4,6 +4,7 @@ import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
+import { Badge, BadgeGroup } from '@/components/ui/Badge';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -98,17 +99,33 @@ export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
 
     return (
         <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
-            {/* Header with minimal info */}
+            {/* Header with badges and detailed info */}
             <div className="px-8 py-6 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
-                <h2 className="text-2xl font-bold text-[#00FFFF] mb-2">
-                    # Sortie de la Promotion
+                <h2 className="text-2xl font-bold text-[#00FFFF] mb-3">
+                    # Sortie de la Promotion - Moment de Cohésion
                 </h2>
-                <p className="text-[#CCCCCC] text-sm mb-1">
-                    <span className="text-[#00FF00]">Date:</span> Février 2025
-                </p>
-                <p className="text-[#CCCCCC] text-sm">
-                    <span className="text-[#00FF00]">Objectif:</span> Cohésion et détente avant les soutenances
-                </p>
+                
+                {/* Badges */}
+                <BadgeGroup>
+                    <Badge label="participants" value="70" colorScheme="green" />
+                    <Badge label="type" value="détente" colorScheme="blue" />
+                    <Badge label="souvenirs" value="200+" colorScheme="red" />
+                    <Badge label="durée" value="journée complète" colorScheme="orange" />
+                    <Badge label="ambiance" value="conviviale" colorScheme="gray" />
+                </BadgeGroup>
+
+                {/* Detailed Description */}
+                <div className="space-y-3 text-[#CCCCCC] text-sm leading-relaxed">
+                    <p>
+                        <span className="text-[#569CD6] font-semibold">Contexte:</span> Sortie collective en février 2025 avant la période intensive des soutenances pour renforcer les liens d'amitié.
+                    </p>
+                    <p>
+                        <span className="text-[#569CD6] font-semibold">Objectifs:</span> Moment de détente après les mois de stage. Créer des souvenirs positifs avant l'épreuve finale des soutenances.
+                    </p>
+                    <p>
+                        <span className="text-[#569CD6] font-semibold">Activités:</span> Moments spontanés, rires partagés, jeux et activités de groupe. Photos et vidéos capturant l'esprit d'équipe de la promotion.
+                    </p>
+                </div>
             </div>
 
             {/* Swiper Carousel */}
@@ -180,11 +197,24 @@ export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
                 </Swiper>
             </div>
 
-            {/* Footer Archive Note */}
-            <div className="px-8 py-5 border-t-2 border-[#00FFFF]/30 bg-[#252526] flex-shrink-0">
-                <p className="text-[#00FFFF] text-sm text-center font-mono">
-                    <span className="text-[#00FF00]">//</span> Moments de cohésion • GI 2025
-                </p>
+            {/* Footer Archive Note with Stats */}
+            <div className="px-8 py-4 border-t-2 border-[#00FFFF]/30 bg-[#252526] flex-shrink-0">
+                <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-4">
+                        <span className="text-[#00FFFF] font-mono">
+                            <span className="text-[#00FF00]">//</span> Sortie promotion GI 2025
+                        </span>
+                        <span className="text-[#858585]">|</span>
+                        <span className="text-[#CCCCCC]">Février 2025</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className="text-[#858585]">Mood:</span>
+                        <span className="inline-flex items-center gap-1 text-[#FF00FF]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#FF00FF] animate-pulse"></span>
+                            Convivial
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     );

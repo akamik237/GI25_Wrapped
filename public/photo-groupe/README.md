@@ -19,3 +19,4 @@ Official group photo of the entire GI 2025 promotion.
 ## Note:
 This will be displayed full-frame with minimal text overlay.
 
+

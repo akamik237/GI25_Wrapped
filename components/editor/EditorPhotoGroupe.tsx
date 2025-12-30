@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { Badge, BadgeGroup } from '@/components/ui/Badge';
 import { Camera, Users, Heart } from 'lucide-react';
 
 interface EditorPhotoGroupeProps {
@@ -20,10 +21,19 @@ export const EditorPhotoGroupe = ({ onScrollEnd }: EditorPhotoGroupeProps) => {
 
     return (
         <div className="h-full w-full flex flex-col bg-[#1E1E1E] overflow-hidden">
-            {/* Minimal Header */}
-            <div className="h-10 bg-[#252526] border-b border-[#3C3C3C] flex items-center px-4 text-[13px] text-[#CCCCCC]">
-                <Camera size={14} className="mr-2" />
-                <span>PHOTO OFFICIELLE DE LA PROMOTION GI 2025</span>
+            {/* Header with badges */}
+            <div className="px-8 py-6 bg-[#252526] border-b border-[#3C3C3C] flex-shrink-0">
+                <h2 className="text-2xl font-bold text-[#4EC9B0] mb-3">
+                    # Photo Officielle de la Promotion GI 2025
+                </h2>
+                
+                {/* Badges */}
+                <BadgeGroup>
+                    <Badge label="diplômés" value="70" colorScheme="green" />
+                    <Badge label="type" value="officielle" colorScheme="blue" />
+                    <Badge label="date" value="septembre 2025" colorScheme="red" />
+                    <Badge label="lieu" value="Campus ENSPY" colorScheme="gray" />
+                </BadgeGroup>
             </div>
 
             {/* Main Content - Full Image Display */}

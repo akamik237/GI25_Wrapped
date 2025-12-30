@@ -4,6 +4,7 @@ import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
+import { Badge, BadgeGroup } from '@/components/ui/Badge';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -105,20 +106,33 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
 
     return (
         <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
-            {/* Header with minimal info */}
+            {/* Header with badges and detailed info */}
             <div className="px-8 py-6 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
-                <h2 className="text-2xl font-bold text-[#00FFFF] mb-2">
-                    # Séance Photo Officielle
+                <h2 className="text-2xl font-bold text-[#00FFFF] mb-3">
+                    # Séance Photo Officielle - Promotion GI 2025
                 </h2>
-                <p className="text-[#CCCCCC] text-sm mb-1">
-                    <span className="text-[#00FF00]">Date:</span> Janvier 2025
-                </p>
-                <p className="text-[#CCCCCC] text-sm mb-1">
-                    <span className="text-[#00FF00]">Lieu:</span> Campus ENSPY, Université de Yaoundé I
-                </p>
-                <p className="text-[#CCCCCC] text-sm">
-                    <span className="text-[#00FF00]">Participants:</span> 70 étudiants • Promotion GI 2025
-                </p>
+                
+                {/* Badges */}
+                <BadgeGroup>
+                    <Badge label="participants" value="70" colorScheme="green" />
+                    <Badge label="photos" value="120+" colorScheme="blue" />
+                    <Badge label="vidéos" value="15" colorScheme="red" />
+                    <Badge label="durée" value="4h" colorScheme="orange" />
+                    <Badge label="lieu" value="Campus ENSPY" colorScheme="gray" />
+                </BadgeGroup>
+
+                {/* Detailed Description */}
+                <div className="space-y-3 text-[#CCCCCC] text-sm leading-relaxed">
+                    <p>
+                        <span className="text-[#569CD6] font-semibold">Contexte:</span> Séance photo officielle en janvier 2025 sur le campus ENSPY. Événement marquant l'unité de la promotion avant les soutenances.
+                    </p>
+                    <p>
+                        <span className="text-[#569CD6] font-semibold">Objectifs:</span> Immortaliser ce moment historique à travers des portraits collectifs et individuels pour les archives officielles de l'école.
+                    </p>
+                    <p>
+                        <span className="text-[#569CD6] font-semibold">Déroulement:</span> Photos de groupe formelles, portraits individuels et clichés spontanés. Une équipe professionnelle a documenté chaque instant de la journée.
+                    </p>
+                </div>
             </div>
 
             {/* Swiper Carousel */}
@@ -190,11 +204,24 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
                 </Swiper>
             </div>
 
-            {/* Footer Archive Note */}
-            <div className="px-8 py-5 border-t-2 border-[#00FFFF]/30 bg-[#252526] flex-shrink-0">
-                <p className="text-[#00FFFF] text-sm text-center font-mono">
-                    <span className="text-[#00FF00]">//</span> Document d'archive officiel • ENSPY • Promotion GI 2025
-                </p>
+            {/* Footer Archive Note with Stats */}
+            <div className="px-8 py-4 border-t-2 border-[#00FFFF]/30 bg-[#252526] flex-shrink-0">
+                <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-4">
+                        <span className="text-[#00FFFF] font-mono">
+                            <span className="text-[#00FF00]">//</span> Archives officielles ENSPY
+                        </span>
+                        <span className="text-[#858585]">|</span>
+                        <span className="text-[#CCCCCC]">Janvier 2025</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className="text-[#858585]">Status:</span>
+                        <span className="inline-flex items-center gap-1 text-[#00FF00]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#00FF00] animate-pulse"></span>
+                            Archivé
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     );
