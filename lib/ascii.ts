@@ -1,6 +1,58 @@
 // ASCII Art pré-généré (car figlet ne fonctionne que côté serveur)
 // Généré avec: http://patorjk.com/software/taag/
 
+// Graduation cap animation frames (rotating/floating effect)
+export const GRADUATION_CAP_FRAMES = [
+    // Frame 1 - Normal
+    `
+    ___________
+   |___________|
+      |     |
+      |_____|
+       |   |
+    `,
+    // Frame 2 - Slight tilt right
+    `
+     ___________
+    |___________|
+       |     |
+       |_____|
+        |   |
+    `,
+    // Frame 3 - More tilt
+    `
+      __________
+     |__________|
+        |    |
+        |____|
+         | |
+    `,
+    // Frame 2 again (reverse)
+    `
+     ___________
+    |___________|
+       |     |
+       |_____|
+        |   |
+    `,
+];
+
+// Decorative pixel elements for the theme
+export const PIXEL_DECORATIONS = {
+    CORNER_TL: '╔',
+    CORNER_TR: '╗',
+    CORNER_BL: '╚',
+    CORNER_BR: '╝',
+    LINE_H: '═',
+    LINE_V: '║',
+    BULLET: '▪',
+    ARROW: '►',
+    STAR: '★',
+    DIPLOMA: '📜',
+    CHECK: '✓',
+    LOADING_BAR: ['▱', '▰'],
+};
+
 export const ASCII_ART = {
   // WRAPPED - Police "Graffiti" (pour Section 1)
   WRAPPED_GRAFFITI: ` __      __                                       .___

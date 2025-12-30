@@ -1,5 +1,5 @@
 import React from 'react';
-import { GitBranch, AlertCircle, Wifi } from 'lucide-react';
+import { GitBranch, AlertCircle, Wifi, AlertTriangle } from 'lucide-react';
 
 interface EditorStatusBarProps {
     branch?: string;
@@ -17,54 +17,44 @@ export const EditorStatusBar = ({
     encoding = 'UTF-8'
 }: EditorStatusBarProps) => {
     return (
-        <div className="h-6 bg-[#007ACC] text-white flex items-center justify-between px-2 text-[12px] select-none">
-            {/* Left Section */}
-            <div className="flex items-center gap-4">
-                {/* Git Branch */}
-                <div className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                    <GitBranch size={14} />
-                    <span>{branch}</span>
-                </div>
-
-                {/* Errors/Warnings */}
+        <div className="h-6 flex items-center">
+           
+            {/* Main Status Bar */}
+            <div className="flex-1 h-6 bg-[#007ACC] text-white flex items-center justify-between px-2 text-[12px] select-none">
+                {/* Left Section */}
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                        <AlertCircle size={14} />
-                        <span>0</span>
+
+                    {/* Git Branch */}
+                    <div className="flex items-center gap-1.5 hover:bg-white/10 px-1.5 py-0.5 rounded cursor-pointer">
+                        <GitBranch size={13} />
+                        <span className="text-[12px]">{branch}</span>
                     </div>
-                    <div className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                        <AlertCircle size={12} />
-                        <span>0</span>
+
+                    {/* Errors/Warnings */}
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 hover:bg-white/10 px-1.5 py-0.5 rounded cursor-pointer">
+                            <AlertTriangle size={13} />
+                            <span className="text-[12px]">0</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Right Section */}
-            <div className="flex items-center gap-4">
-                {/* Connection Status */}
-                <div className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                    <Wifi size={14} />
-                    <span>Connected</span>
-                </div>
+                {/* Right Section */}
+                <div className="flex items-center gap-1">
+                    {/* Line/Column */}
+                    <div className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
+                        Ln {line}, Col {column}
+                    </div>
 
-                {/* Line/Column */}
-                <div className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                    Ln {line}, Col {column}
-                </div>
+                    {/* Encoding */}
+                    <div className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
+                        {encoding}
+                    </div>
 
-                {/* Encoding */}
-                <div className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                    {encoding}
-                </div>
-
-                {/* Language */}
-                <div className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                    {language}
-                </div>
-
-                {/* Notification Bell */}
-                <div className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
-                    <AlertCircle size={16} />
+                    {/* Notification Bell */}
+                    <div className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer">
+                        <AlertCircle size={16} />
+                    </div>
                 </div>
             </div>
         </div>

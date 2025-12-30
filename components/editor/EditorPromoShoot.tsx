@@ -1,155 +1,199 @@
 "use client";
 
 import React from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 interface EditorPromoShootProps {
     onScrollEnd?: () => void;
 }
 
 export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
-    const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
-    const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
-    const containerRef = React.useRef<HTMLDivElement>(null);
+    const [currentSlide, setCurrentSlide] = React.useState(0);
+    const swiperRef = React.useRef<SwiperType | null>(null);
+    const videoRefs = React.useRef<{[key: number]: HTMLVideoElement | null}>({});
 
-    // Images for carousel
+    // Images/Videos for carousel - Videos first and last
     const images = [
-        { src: "/promo-shoot/photo1.jpg", caption: "Vue d'ensemble - Promotion GI 2025" },
-        { src: "/promo-shoot/photo2.jpg", caption: "Portrait collectif officiel" },
-        { src: "/promo-shoot/photo3.jpg", caption: "Moments de cohésion" },
-        { src: "/promo-shoot/photo4.jpg", caption: "Esprit d'équipe" },
-        { src: "/promo-shoot/photo5.jpg", caption: "Ambiance conviviale" },
+        { src: "/promo-shoot/videophotodelapromo1.MOV", caption: "Séance photo de la promotion", isVideo: true },
+        { src: "/promo-shoot/photo_2025-12-30_15-03-18.jpg", caption: "Vue d'ensemble - Promotion GI 2025", isVideo: false },
+        { src: "/promo-shoot/photo_2025-12-30_16-12-51.jpg", caption: "Portrait collectif officiel", isVideo: false },
+        { src: "/promo-shoot/photo_2025-12-30_16-13-08.jpg", caption: "Moments de cohésion", isVideo: false },
+        { src: "/promo-shoot/photo_2025-12-30_16-13-10.jpg", caption: "Esprit d'équipe", isVideo: false },
+        { src: "/promo-shoot/photo_2025-12-30_16-13-14.jpg", caption: "Ambiance conviviale", isVideo: false },
+        { src: "/promo-shoot/Recap_photodelapromo.mp4", caption: "Récapitulatif de la journée photo", isVideo: true },
     ];
 
-    // Auto-play carousel vertically
+    // Handle video playback and slide change
     React.useEffect(() => {
-        if (!isAutoPlaying) return;
-
-        const interval = setInterval(() => {
-            setCurrentImageIndex((prev) => (prev + 1) % images.length);
-        }, 3000); // Change image every 3 seconds
-
-        return () => clearInterval(interval);
-    }, [isAutoPlaying, images.length]);
-
-    // Detect when user has seen all images (trigger next section after last image + 10s)
-    React.useEffect(() => {
-        if (currentImageIndex === images.length - 1 && onScrollEnd) {
-            const timer = setTimeout(() => {
-                onScrollEnd();
-            }, 10000); // Wait 10 seconds on the last image before moving to next section
-            return () => clearTimeout(timer);
+        const currentImage = images[currentSlide];
+        
+        if (!currentImage || !swiperRef.current) return;
+        
+        if (currentImage.isVideo) {
+            // Stop autoplay for videos
+            swiperRef.current.autoplay.stop();
+            
+            const videoElement = videoRefs.current[currentSlide];
+            if (videoElement) {
+                // Reset video to start
+                videoElement.currentTime = 0;
+                
+                // Play video
+                const playPromise = videoElement.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch((error) => {
+                        console.log('Lecture vidéo bloquée:', error);
+                    });
+                }
+                
+                // Listen for video end
+                const handleVideoEnd = () => {
+                    console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
+                    
+                    if (currentSlide === images.length - 1) {
+                        // Last video - trigger next section
+                        console.log('Dernière vidéo - passage à la section suivante');
+                        if (onScrollEnd) {
+                            setTimeout(() => {
+                                onScrollEnd();
+                            }, 2000);
+                        }
+                    } else {
+                        // Move to next slide
+                        console.log('Passage à la slide suivante');
+                        swiperRef.current?.slideNext();
+                    }
+                };
+                
+                videoElement.addEventListener('ended', handleVideoEnd);
+                return () => {
+                    videoElement.removeEventListener('ended', handleVideoEnd);
+                    videoElement.pause();
+                };
+            }
+        } else {
+            // Resume autoplay for images
+            console.log(`Image ${currentSlide + 1} - autoplay actif`);
+            swiperRef.current.autoplay.start();
         }
-    }, [currentImageIndex, images.length, onScrollEnd]);
+    }, [currentSlide, images, onScrollEnd]);
 
-    const handleImageClick = () => {
-        setIsAutoPlaying(!isAutoPlaying);
+    const handleSlideClick = () => {
+        // Don't allow skipping during video playback
+        const currentImage = images[currentSlide];
+        if (currentImage?.isVideo) {
+            const videoElement = videoRefs.current[currentSlide];
+            if (videoElement && !videoElement.paused && !videoElement.ended) {
+                // Video is playing, don't skip
+                console.log('⏸ Vidéo en cours, attendez la fin');
+                return;
+            }
+        }
+        
+        // Allow navigation for images or finished videos
+        if (currentSlide < images.length - 1) {
+            swiperRef.current?.slideNext();
+        }
     };
 
     return (
-        <div ref={containerRef} className="flex-1 flex flex-col bg-[#1E1E1E] overflow-y-auto">
+        <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
             {/* Header with minimal info */}
-            <div className="px-8 py-6 border-b border-[#3C3C3C]">
-                <h2 className="text-2xl font-bold text-[#4EC9B0] mb-2">
+            <div className="px-8 py-6 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
+                <h2 className="text-2xl font-bold text-[#00FFFF] mb-2">
                     # Séance Photo Officielle
                 </h2>
                 <p className="text-[#CCCCCC] text-sm mb-1">
-                    <span className="text-[#569CD6]">Date:</span> Janvier 2025
+                    <span className="text-[#00FF00]">Date:</span> Janvier 2025
                 </p>
                 <p className="text-[#CCCCCC] text-sm mb-1">
-                    <span className="text-[#569CD6]">Lieu:</span> Campus ENSPY, Université de Yaoundé I
+                    <span className="text-[#00FF00]">Lieu:</span> Campus ENSPY, Université de Yaoundé I
                 </p>
                 <p className="text-[#CCCCCC] text-sm">
-                    <span className="text-[#569CD6]">Participants:</span> 70 étudiants • Promotion GI 2025
+                    <span className="text-[#00FF00]">Participants:</span> 70 étudiants • Promotion GI 2025
                 </p>
             </div>
 
-            {/* Vertical Auto Carousel */}
-            <div className="flex-1 overflow-hidden relative">
-                <div 
-                    className="absolute inset-0 transition-transform duration-700 ease-in-out"
-                    style={{
-                        transform: `translateY(-${currentImageIndex * 100}%)`
+            {/* Swiper Carousel */}
+            <div className="flex-1 overflow-hidden relative bg-[#1E1E1E]">
+                <Swiper
+                    direction="vertical"
+                    modules={[Autoplay, Pagination, Navigation]}
+                    autoplay={{
+                        delay: 3000,
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: false,
+                        waitForTransition: true,
                     }}
+                    pagination={{
+                        clickable: true,
+                        renderBullet: (index, className) => {
+                            return `<span class="${className}" style="background: #00FFFF"></span>`;
+                        },
+                    }}
+                    speed={700}
+                    allowTouchMove={false}
+                    preventInteractionOnTransition={true}
+                    onSwiper={(swiper) => {
+                        swiperRef.current = swiper;
+                    }}
+                    onSlideChange={(swiper) => {
+                        setCurrentSlide(swiper.activeIndex);
+                        console.log(`🎬 Swiper PromoShoot: Slide ${swiper.activeIndex + 1}`);
+                    }}
+                    className="w-full h-full"
+                    style={{ height: '100%' }}
                 >
                     {images.map((image, index) => (
-                        <div
-                            key={index}
-                            className="h-screen w-full flex flex-col items-center justify-center p-8 cursor-pointer"
-                            onClick={handleImageClick}
-                        >
-                            {/* Image Container */}
-                            <div className="relative w-full max-w-4xl h-[70vh] bg-gradient-to-br from-[#1E1E1E] to-[#252526] rounded-lg border border-[#3C3C3C] flex items-center justify-center overflow-hidden">
-                                {/* Placeholder for actual image */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="text-center">
-                                        <svg className="w-32 h-32 mx-auto mb-6 text-[#4EC9B0] opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <p className="text-[#858585] text-sm">
-                                            [{image.src}]
-                                        </p>
-                                    </div>
+                        <SwiperSlide key={index}>
+                            <div
+                                className="w-full h-full flex flex-col items-center justify-center p-8 cursor-pointer bg-[#1E1E1E]"
+                                onClick={handleSlideClick}
+                            >
+                                {/* Image/Video Container */}
+                                <div className="relative w-full max-w-5xl h-[500px] bg-gradient-to-br from-[#252526] to-[#1E1E1E] rounded-lg border-2 border-[#00FFFF] flex items-center justify-center overflow-hidden shadow-lg shadow-[#00FFFF]/20">
+                                    {image.isVideo ? (
+                                        <video
+                                            ref={(el) => { videoRefs.current[index] = el; }}
+                                            src={image.src}
+                                            className="max-w-full max-h-full object-contain"
+                                            playsInline
+                                            controls={false}
+                                            onLoadedMetadata={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
+                                        />
+                                    ) : (
+                                        <img
+                                            src={image.src}
+                                            alt={image.caption}
+                                            className="max-w-full max-h-full object-contain"
+                                            onLoad={() => console.log(`✓ Image ${index + 1} chargée`)}
+                                        />
+                                    )}
                                 </div>
 
-                                {/* Auto-play indicator */}
-                                {isAutoPlaying && (
-                                    <div className="absolute top-4 right-4 flex items-center gap-2 bg-[#1E1E1E]/80 px-3 py-2 rounded-full border border-[#00FF00]">
-                                        <div className="w-2 h-2 bg-[#00FF00] rounded-full animate-pulse" />
-                                        <span className="text-[#00FF00] text-xs font-mono">AUTO</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Caption */}
-                            <div className="mt-6 max-w-4xl w-full">
-                                <div className="flex items-center gap-4 p-4 bg-[#252526] border border-[#3C3C3C] rounded-lg">
-                                    <svg className="w-5 h-5 text-[#00FF00] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                    <p className="text-[#CCCCCC] text-lg flex-1">
+                                {/* Caption */}
+                                <div className="mt-6 max-w-5xl w-full">
+                                    <p className="text-[#CCCCCC] text-center text-lg font-light italic">
                                         {image.caption}
                                     </p>
-                                    <span className="text-[#858585] text-sm font-mono">
-                                        {index + 1}/{images.length}
-                                    </span>
                                 </div>
                             </div>
-                        </div>
+                        </SwiperSlide>
                     ))}
-                </div>
-
-                {/* Progress Indicators - Vertical */}
-                <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-10">
-                    {images.map((_, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => {
-                                setCurrentImageIndex(idx);
-                                setIsAutoPlaying(false);
-                            }}
-                            className={`w-2 rounded-full transition-all ${
-                                idx === currentImageIndex
-                                    ? 'h-12 bg-[#00FF00]'
-                                    : 'h-2 bg-[#3C3C3C] hover:bg-[#858585]'
-                            }`}
-                            aria-label={`Go to image ${idx + 1}`}
-                        />
-                    ))}
-                </div>
-
-                {/* Control Hint */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center">
-                    <p className="text-[#858585] text-xs">
-                        {isAutoPlaying ? 'Cliquez pour mettre en pause' : 'Cliquez pour reprendre'}
-                    </p>
-                </div>
+                </Swiper>
             </div>
 
             {/* Footer Archive Note */}
-            <div className="px-8 py-4 border-t border-[#3C3C3C] bg-[#252526]">
-                <p className="text-[#6A9955] text-xs italic text-center">
-                    <span className="text-[#569CD6]">//</span> Document d'archive officiel • ENSPY • Promotion GI 2025
+            <div className="px-8 py-5 border-t-2 border-[#00FFFF]/30 bg-[#252526] flex-shrink-0">
+                <p className="text-[#00FFFF] text-sm text-center font-mono">
+                    <span className="text-[#00FF00]">//</span> Document d'archive officiel • ENSPY • Promotion GI 2025
                 </p>
             </div>
         </div>

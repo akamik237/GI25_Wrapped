@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { FileCode2, FileText } from 'lucide-react';
+import { FileCode2, FileText, X } from 'lucide-react';
 import { Allotment } from "allotment";
 import { EditorSidebar } from "../editor/EditorSidebar";
 import { EditorExtensions } from "../editor/EditorExtensions";
@@ -49,49 +49,28 @@ export const SectionIntro = () => {
     // Code content configuration
     const CODE_LINES = [
         [
-            { text: "     import", color: "#569CD6" },
-            { text: " { ", color: "#D4D4D4" },
-            { text: "runWrapped", color: "#D4D4D4" },
-            { text: " } ", color: "#D4D4D4" },
-            { text: "from", color: "#569CD6" },
-            { text: " ", color: "#D4D4D4" },
-            { text: "'./.system'", color: "#CE9178" },
-            { text: ";", color: "#D4D4D4" },
-        ],
-        [], // empty line
-        [
-            { text: "     export", color: "#569CD6" },
-            { text: " ", color: "#D4D4D4" },
-            { text: "async", color: "#569CD6" },
-            { text: " ", color: "#D4D4D4" },
-            { text: "function", color: "#569CD6" },
-            { text: " ", color: "#D4D4D4" },
-            { text: "main", color: "#DCDCAA" },
-            { text: "() {", color: "#D4D4D4" },
+            { text: "// GI 2025 WRAPPED | Designed by AKAMIK VIZUALZ & LASHU THIERRY", color: "#6A9955" },
         ],
         [
-            { text: "  ", color: "#D4D4D4" },
-            { text: "    console", color: "#D4D4D4" },
-            { text: ".", color: "#D4D4D4" },
-            { text: "log", color: "#DCDCAA" },
-            { text: "(", color: "#D4D4D4" },
-            { text: "'[SYSTEM] Type \"run\" or \"INIT_WRAPPED_2025\" to begin...'", color: "#CE9178" },
-            { text: ");", color: "#D4D4D4" },
+            { text: "// Type 'run' in the terminal below to start", color: "#6A9955" },
         ],
         [],
         [
-            { text: "  ", color: "#D4D4D4" },
-            { text: "    // Waiting for user interaction...", color: "#6A9955" },
-        ],
-        [
-            { text: "  ", color: "#D4D4D4" },
-            { text: "     await", color: "#569CD6" },
+            { text: "import", color: "#569CD6" },
+            { text: " { ", color: "#D4D4D4" },
+            { text: "initWrapped2025", color: "#4EC9B0" },
+            { text: " } ", color: "#D4D4D4" },
+            { text: "from", color: "#569CD6" },
             { text: " ", color: "#D4D4D4" },
-            { text: "runWrapped", color: "#D4D4D4" },
-            { text: "();", color: "#D4D4D4" },
+            { text: "'./wrapped'", color: "#CE9178" },
+            { text: ";", color: "#D4D4D4" },
         ],
+        [],
         [
-            { text: "     }", color: "#D4D4D4" },
+            { text: "await", color: "#569CD6" },
+            { text: " ", color: "#D4D4D4" },
+            { text: "initWrapped2025", color: "#4EC9B0" },
+            { text: "();", color: "#D4D4D4" },
         ]
     ];
 
@@ -120,7 +99,8 @@ export const SectionIntro = () => {
         setIsTransitioning(true);
         
         setTimeout(() => {
-            const nextSection = currentSection + 1;
+            // Special case: sections 1 & 2 are merged in terminal, skip directly to 3
+            const nextSection = currentSection === 1 || currentSection === 2 ? 3 : currentSection + 1;
             setCurrentSection(nextSection);
             
             // Update layout based on section
@@ -211,6 +191,16 @@ export const SectionIntro = () => {
 
     const showExtensionPanel = extensionMode !== 'none';
     const showTerminalPanel = (showTerminal && currentSection <= 2) || currentSection === 5 || currentSection === 10 || currentSection === 17;
+    
+    // Terminal size based on section type
+    const isFullTerminalSection = currentSection <= 2 || currentSection === 5 || currentSection === 10 || currentSection === 17;
+    const terminalSize = isFullTerminalSection
+        ? { preferredSize: 700, minSize: 500, maxSize: 900 }  // Full terminal sections - bigger (1, 2, 5, 10, 17)
+        : { preferredSize: 400, minSize: 150, maxSize: 600 };  // Regular sections with code
+    
+    const editorSize = isFullTerminalSection
+        ? { minSize: 100, preferredSize: 200 }  // Smaller editor for terminal sections
+        : { minSize: 200 };  // Normal editor size
 
     return (
         <div className="h-full w-full flex flex-col bg-[#1E1E1E]">
@@ -258,79 +248,141 @@ export const SectionIntro = () => {
                     {/* Main Editor Area */}
                     <Allotment.Pane>
                         <div className={`h-full flex flex-col overflow-hidden transition-opacity duration-300 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
-                    {/* Tabs Bar */}
-                    <div className="flex items-center h-9 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
-                        {/* main.ts tab */}
+                    {/* Tabs Bar - VS Code Style */}
+                    <div className="flex items-center h-11 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0 overflow-x-auto scrollbar-thin scrollbar-thumb-[#424242] scrollbar-track-transparent">
+                        {/* Overview tab (main.ts) */}
                         <div 
-                            className={`flex items-center px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer ${currentView === 'main.ts' ? 'bg-[#1E1E1E]' : 'bg-[#2D2D30]'}`}
+                            className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'main.ts' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
                             onClick={() => setCurrentView('main.ts')}
                         >
-                            <FileCode2 size={16} className="mr-2 text-[#519ABA]" />
-                            <span className="text-[13px] text-[#CCCCCC]">main.ts</span>
-                            {currentView === 'main.ts' && <span className="ml-2 text-white text-xs">●</span>}
+                            <FileCode2 size={16} className="text-[#519ABA]" />
+                            <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">overview.md</span>
+                            <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
                         </div>
                         
                         {/* PromoShoot.md tab */}
                         {currentSection >= 3 && (
                             <div 
-                                className={`flex items-center px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer ${currentView === 'PromoShoot.md' ? 'bg-[#1E1E1E]' : 'bg-[#2D2D30]'}`}
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'PromoShoot.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
                                 onClick={() => setCurrentView('PromoShoot.md')}
                             >
-                                <FileText size={16} className="mr-2 text-[#519ABA]" />
-                                <span className="text-[13px] text-[#CCCCCC]">PromoShoot.md</span>
-                                {currentView === 'PromoShoot.md' && <span className="ml-2 text-white text-xs">●</span>}
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">promo-shoot.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
                             </div>
                         )}
 
                         {/* SortiePromo.md tab */}
                         {currentSection >= 4 && (
                             <div 
-                                className={`flex items-center px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer ${currentView === 'SortiePromo.md' ? 'bg-[#1E1E1E]' : 'bg-[#2D2D30]'}`}
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'SortiePromo.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
                                 onClick={() => setCurrentView('SortiePromo.md')}
                             >
-                                <FileText size={16} className="mr-2 text-[#519ABA]" />
-                                <span className="text-[13px] text-[#CCCCCC]">SortiePromo.md</span>
-                                {currentView === 'SortiePromo.md' && <span className="ml-2 text-white text-xs">●</span>}
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">sortie-promo.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                            </div>
+                        )}
+
+                        {/* Entreprises.md tab */}
+                        {currentSection >= 6 && (
+                            <div 
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Entreprises.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                onClick={() => setCurrentView('Entreprises.md')}
+                            >
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">entreprises.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                            </div>
+                        )}
+
+                        {/* Soutenances Juillet tab */}
+                        {currentSection >= 7 && (
+                            <div 
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Soutenances_Juillet.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                onClick={() => setCurrentView('Soutenances_Juillet.md')}
+                            >
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">defenses-july.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                            </div>
+                        )}
+
+                        {/* Soutenances Septembre tab */}
+                        {currentSection >= 8 && (
+                            <div 
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Soutenances_Septembre.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                onClick={() => setCurrentView('Soutenances_Septembre.md')}
+                            >
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">defenses-sept.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                            </div>
+                        )}
+
+                        {/* Backstage tab */}
+                        {currentSection >= 13 && (
+                            <div 
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Backstage.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                onClick={() => setCurrentView('Backstage.md')}
+                            >
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">backstage.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                            </div>
+                        )}
+
+                        {/* Communion tab */}
+                        {currentSection >= 14 && (
+                            <div 
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Communion_Cadets.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                onClick={() => setCurrentView('Communion_Cadets.md')}
+                            >
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">communion.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                            </div>
+                        )}
+
+                        {/* Photo Groupe tab */}
+                        {currentSection >= 15 && (
+                            <div 
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'PhotoGroupe.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                onClick={() => setCurrentView('PhotoGroupe.md')}
+                            >
+                                <FileText size={16} className="text-[#519ABA]" />
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">photo-groupe.md</span>
+                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
                             </div>
                         )}
                     </div>
-
-                            {/* Breadcrumb */}
-                            <div className="flex-shrink-0">
-                                {currentView === 'main.ts' && <EditorBreadcrumb path={['GI25_WRAPPED', 'main.ts']} />}
-                                {currentView === 'PromoShoot.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'PromoShoot.md']} />}
-                                {currentView === 'SortiePromo.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'SortiePromo.md']} />}
-                                {currentView === 'Entreprises.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'Entreprises.md']} />}
-                                {currentView === 'Soutenances_Juillet.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'Soutenances_Juillet.md']} />}
-                                {currentView === 'Soutenances_Septembre.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'Soutenances_Septembre.md']} />}
-                                {currentView === 'Backstage.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'Backstage.md']} />}
-                                {currentView === 'Communion_Cadets.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'Communion_Cadets.md']} />}
-                                {currentView === 'PhotoGroupe.md' && <EditorBreadcrumb path={['GI25_WRAPPED', 'docs', 'PhotoGroupe.md']} />}
-                            </div>
 
                             {/* Editor Content + Terminal - Vertical Split with Allotment */}
                             <div className="flex-1 min-h-0">
                                 <Allotment vertical>
                                     {/* Editor Content Pane */}
-                                    <Allotment.Pane minSize={200}>
+                                    <Allotment.Pane 
+                                        minSize={editorSize.minSize}
+                                        preferredSize={editorSize.preferredSize}
+                                    >
                                         <div className="h-full overflow-hidden bg-[#1E1E1E]">
                                             {currentView === 'main.ts' ? (
                                                 /* Code Editor */
                                                 <div className="h-full overflow-y-auto bg-[#1E1E1E]">
                                                     <div className="py-4 font-mono text-[14px]">
-                                                        {CODE_LINES.map((lineTokens, index) => (
-                                                            <EditorLine key={index} number={index + 1}>
-                                                                {index < typedLines && (
-                                                                    <>
-                                                                        {lineTokens.map((token, tIndex) => (
-                                                                            <span key={tIndex} style={{ color: token.color }}>
-                                                                                {token.text}
-                                                                            </span>
-                                                                        ))}
-                                                                    </>
-                                                                )}
-                                                            </EditorLine>
-                                                        ))}
+                        {CODE_LINES.map((lineTokens, index) => (
+                            <EditorLine key={index} number={index + 1}>
+                                {index < typedLines && (
+                                    <>
+                                        {lineTokens.map((token, tIndex) => (
+                                            <span key={tIndex} style={{ color: token.color }}>
+                                                {token.text}
+                                            </span>
+                                        ))}
+                                    </>
+                                )}
+                            </EditorLine>
+                        ))}
                                                     </div>
                                                 </div>
                                             ) : currentView === 'PromoShoot.md' ? (
@@ -355,14 +407,18 @@ export const SectionIntro = () => {
 
                                     {/* Terminal Pane - Conditional and Resizable */}
                                     {showTerminalPanel && (
-                                        <Allotment.Pane minSize={150} preferredSize={400} maxSize={600}>
+                                        <Allotment.Pane 
+                                            minSize={terminalSize.minSize} 
+                                            preferredSize={terminalSize.preferredSize} 
+                                            maxSize={terminalSize.maxSize}
+                                        >
                                             <div className="h-full">
                                                 {showTerminal && currentSection <= 2 && (
-                                                    <EditorTerminal
-                                                        onRun={handleRun}
+                        <EditorTerminal
+                            onRun={handleRun}
                                                         onScrollEnd={handleScrollEnd}
-                                                    />
-                                                )}
+                        />
+                    )}
                                                 {currentSection === 5 && (
                                                     <EditorTerminalThemes onScrollEnd={handleScrollEnd} />
                                                 )}
@@ -390,6 +446,6 @@ export const SectionIntro = () => {
                 language={currentView === 'main.ts' ? "TypeScript" : "Markdown"}
                 encoding="UTF-8"
             />
-        </div>
+                </div>
     );
 };

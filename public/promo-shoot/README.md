@@ -1,23 +1,24 @@
-# PromoShoot Images
+# PromoShoot Médias
 
-Place your promotion photo shoot images in this directory.
+Placez vos photos et vidéos de la séance photo dans ce répertoire.
 
-## Required Images:
-- photo1.jpg - Vue d'ensemble - Promotion GI 2025
-- photo2.jpg - Portrait collectif officiel
-- photo3.jpg - Moments de cohésion
-- photo4.jpg - Esprit d'équipe
-- photo5.jpg - Ambiance conviviale
+## Médias requis (5 items):
+- `photo1.jpg` ou `photo1.mp4` - Vue d'ensemble - Promotion GI 2025
+- `photo2.jpg` ou `photo2.mp4` - Portrait collectif officiel
+- `photo3.jpg` ou `photo3.mp4` - Moments de cohésion
+- `photo4.jpg` ou `photo4.mp4` - Esprit d'équipe
+- `photo5.jpg` ou `photo5.mp4` - Ambiance conviviale
 
-## Recommended Format:
-- Portrait orientation (recommended)
-- High resolution (min 1200px width)
-- JPG or PNG format
-- Optimized for web (compressed but good quality)
+## Formats supportés:
+- **Images**: JPG, PNG, WEBP
+- **Vidéos**: MP4, WEBM
+
+## Recommandations:
+- Orientation portrait (recommandé)
+- Haute résolution (min 1200px de largeur)
+- Optimisé pour le web
 
 ## Note:
-These images will be displayed in a carousel in the PromoShoot.md section of the GI 2025 Wrapped experience.
+Ces médias seront affichés dans un carrousel vertical automatique dans la section PromoShoot.md.
 
-
-
-
+Si vous avez une vidéo récapitulative (`Recap_journée_photodelapromo.mp4`), vous pouvez l'extraire en frames ou la placer directement ici.

@@ -1,185 +1,183 @@
 "use client";
 
 import React from 'react';
-import { Calendar, Users, Trophy, Clock } from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 interface EditorSoutenancesJuilletProps {
     onScrollEnd?: () => void;
 }
 
-export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuilletProps) => {
-    const [currentMedia, setCurrentMedia] = React.useState(0);
-    const contentRef = React.useRef<HTMLDivElement>(null);
-    const [hasScrolledToEnd, setHasScrolledToEnd] = React.useState(false);
+interface MediaItem {
+    src: string;
+    caption: string;
+    isVideo: boolean;
+}
 
-    const mediaItems = [
-        { type: 'image', caption: 'Première soutenance de juillet', emoji: '🎓' },
-        { type: 'image', caption: 'Présentation devant le jury', emoji: '👨‍🏫' },
-        { type: 'image', caption: 'Démonstration technique', emoji: '💻' },
-        { type: 'video', caption: 'Moment de félicitations', emoji: '🎉' },
-        { type: 'image', caption: 'Applaudissements du public', emoji: '👏' },
+export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuilletProps) => {
+    const [currentSlide, setCurrentSlide] = React.useState(0);
+    const swiperRef = React.useRef<any>(null);
+    const videoRefs = React.useRef<(HTMLVideoElement | null)[]>([]);
+
+    const media: MediaItem[] = [
+        { src: "/soutenances-juillet/Recap_1.mp4", caption: "Jour 1 - Première journée de soutenances", isVideo: true },
+        { src: "/soutenances-juillet/Recap_2.mp4", caption: "Jour 2 - Défenses et présentations", isVideo: true },
+        { src: "/soutenances-juillet/Recap_3.mp4", caption: "Jour 3 - Soutenances en série", isVideo: true },
+        { src: "/soutenances-juillet/Recap_4.mp4", caption: "Jour 4 - Passages devant le jury", isVideo: true },
+        { src: "/soutenances-juillet/Recap_5.mp4", caption: "Jour 5 - Derniers passages de juillet", isVideo: true },
     ];
 
+    // Handle video playback and slide change
     React.useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentMedia((prev) => (prev + 1) % mediaItems.length);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [mediaItems.length]);
+        const currentMedia = media[currentSlide];
 
-    // Detect scroll to end
-    React.useEffect(() => {
-        const handleScroll = () => {
-            if (!contentRef.current || hasScrolledToEnd) return;
+        if (!currentMedia || !swiperRef.current) return;
 
-            const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
-            const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
+        if (currentMedia.isVideo) {
+            swiperRef.current.autoplay.stop();
+            swiperRef.current.allowTouchMove = false; // Disable swipe during video
 
-            if (isAtBottom && !hasScrolledToEnd) {
-                setHasScrolledToEnd(true);
-                if (onScrollEnd) {
-                    setTimeout(() => {
-                        onScrollEnd();
-                    }, 5000);
+            const videoElement = videoRefs.current[currentSlide];
+            if (videoElement) {
+                videoElement.currentTime = 0;
+                const playPromise = videoElement.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch((error) => console.log('Lecture vidéo bloquée:', error));
                 }
-            }
-        };
 
-        const element = contentRef.current;
-        if (element) {
-            element.addEventListener('scroll', handleScroll);
-            return () => element.removeEventListener('scroll', handleScroll);
+                const handleVideoEnd = () => {
+                    console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
+                    swiperRef.current.allowTouchMove = true; // Re-enable swipe
+
+                    if (currentSlide === media.length - 1) {
+                        if (onScrollEnd) {
+                            setTimeout(() => onScrollEnd(), 2000); // 2s delay for last video
+                        }
+                    } else {
+                        swiperRef.current?.slideNext();
+                    }
+                };
+
+                videoElement.addEventListener('ended', handleVideoEnd);
+                return () => {
+                    videoElement.removeEventListener('ended', handleVideoEnd);
+                    videoElement.pause();
+                    swiperRef.current.allowTouchMove = true; // Ensure swipe is re-enabled on unmount/cleanup
+                };
+            }
+        } else {
+            swiperRef.current.allowTouchMove = true; // Enable swipe for images
+            swiperRef.current.autoplay.start();
         }
-    }, [hasScrolledToEnd, onScrollEnd]);
+    }, [currentSlide, media, onScrollEnd]);
+
+    const handleSlideClick = () => {
+        const currentMedia = media[currentSlide];
+        if (currentMedia.isVideo) {
+            console.log("⏸ Vidéo en cours, attendez la fin");
+            return;
+        }
+        // For images, allow manual advance
+        swiperRef.current?.slideNext();
+    };
 
     return (
-        <div className="h-full w-full flex bg-[#1E1E1E] overflow-hidden">
-            {/* Markdown Content */}
-            <div ref={contentRef} className="w-1/2 overflow-y-auto p-8 font-mono text-[14px] text-[#CCCCCC] scrollbar-thin scrollbar-thumb-[#424242] scrollbar-track-transparent">
-                <h1 className="text-3xl font-bold text-[#4EC9B0] mb-6">
+        <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
+            {/* Header with detailed info */}
+            <div className="px-8 py-6 border-b border-[#3C3C3C]">
+                <h2 className="text-2xl font-bold text-[#00FFFF] mb-3">
                     # Soutenances de Juillet 2025
-                </h1>
-
-                <div className="space-y-4 leading-relaxed">
-                    <div className="flex items-center gap-3 text-[#D4D4D4]">
-                        <Calendar size={20} className="text-[#569CD6]" />
-                        <span><span className="text-[#569CD6]">**Période**</span> : Juillet 2025</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-[#D4D4D4]">
-                        <Users size={20} className="text-[#569CD6]" />
-                        <span><span className="text-[#569CD6]">**Candidats**</span> : Première vague</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-[#D4D4D4]">
-                        <Clock size={20} className="text-[#569CD6]" />
-                        <span><span className="text-[#569CD6]">**Durée**</span> : 2 semaines intensives</span>
-                    </div>
-
-                    <div className="mt-8">
-                        <h2 className="text-xl font-semibold text-[#4EC9B0] mb-4">
-                            ## Le début de la fin
-                        </h2>
-                        <p className="text-[#D4D4D4] leading-7">
-                            Juillet marque le lancement officiel des soutenances de fin d'études de la promotion 
-                            GI 2025. Après des mois de stage et de rédaction, les premiers étudiants se présentent 
-                            devant le jury pour défendre leurs travaux. L'atmosphère est chargée d'excitation et 
-                            d'appréhension, mais aussi de fierté.
-                        </p>
-                    </div>
-
-                    <div className="mt-8">
-                        <h2 className="text-xl font-semibold text-[#4EC9B0] mb-4">
-                            ## Moments clés
-                        </h2>
-                        <ul className="list-disc list-inside space-y-2 text-[#D4D4D4]">
-                            <li>Première soutenance de la promotion</li>
-                            <li>Présentations techniques impressionnantes</li>
-                            <li>Questions pointues du jury</li>
-                            <li>Démonstrations live des projets</li>
-                            <li>Premières mentions "Excellent"</li>
-                            <li>Ambiance de soutien entre camarades</li>
-                        </ul>
-                    </div>
-
-                    <div className="mt-8">
-                        <h2 className="text-xl font-semibold text-[#4EC9B0] mb-4">
-                            ## Statistiques
-                        </h2>
-                        <div className="space-y-2 text-[#D4D4D4]">
-                            <div className="flex justify-between">
-                                <span>Soutenances réalisées</span>
-                                <span className="text-[#4EC9B0] font-bold">~45</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Taux de réussite</span>
-                                <span className="text-[#4EC9B0] font-bold">100%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Durée moyenne</span>
-                                <span className="text-[#4EC9B0] font-bold">45 min</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-8 p-4 bg-[#2D2D30] border-l-4 border-[#569CD6] rounded">
-                        <div className="flex items-start gap-3">
-                            <Trophy size={20} className="text-[#569CD6] mt-1" />
-                            <div>
-                                <p className="text-[#D4D4D4] font-semibold mb-2">
-                                    Tension & Réussite
-                                </p>
-                                <p className="text-[#D4D4D4] italic text-sm">
-                                    "C'est un mélange de stress et d'excitation. Tu sais que c'est la dernière 
-                                    épreuve avant de devenir ingénieur. Tout le travail de cinq ans se joue ici."
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </h2>
+                <p className="text-[#CCCCCC] text-sm mb-3">
+                    <span className="text-[#569CD6]">Période:</span> Juillet 2025 • <span className="text-[#569CD6]">Candidats:</span> Première vague (~45 étudiants)
+                </p>
+                <p className="text-[#CCCCCC] text-sm mb-3">
+                    <span className="text-[#569CD6]">Contexte:</span> Le lancement officiel des soutenances de fin d'études. Après des mois de stage intensif 
+                    et de rédaction de mémoires, les premiers étudiants se présentent devant le jury pour défendre leurs travaux de recherche et développement.
+                </p>
+                <p className="text-[#CCCCCC] text-sm mb-2">
+                    <span className="text-[#569CD6]">Ambiance:</span> Mélange d'excitation, d'appréhension et de fierté. C'est la dernière épreuve académique 
+                    avant l'obtention du diplôme d'ingénieur. Chaque présentation dure environ 45 minutes : 20 minutes de présentation, 20 minutes de questions 
+                    du jury, et 5 minutes de délibération.
+                </p>
+                <p className="text-[#CCCCCC] text-sm">
+                    <span className="text-[#569CD6]">Résultats:</span> Taux de réussite de 100% • Premières mentions "Très Bien" et "Excellent" • 
+                    Ambiance de soutien remarquable entre camarades
+                </p>
             </div>
 
-            {/* Preview - Media Carousel */}
-            <div className="w-1/2 bg-[#1E1E1E] border-l border-[#3C3C3C] flex flex-col">
-                <div className="h-10 bg-[#252526] border-b border-[#3C3C3C] flex items-center px-4 text-[13px] text-[#CCCCCC]">
-                    <span>PREVIEW</span>
-                </div>
-                
-                <div className="flex-1 relative overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#2D2D30]">
-                    {mediaItems.map((item, index) => (
-                        <div
-                            key={index}
-                            className={`absolute inset-0 transition-opacity duration-1000 ${
-                                index === currentMedia ? 'opacity-100' : 'opacity-0'
-                            }`}
-                        >
-                            <div className="w-full h-full flex items-center justify-center p-12">
-                                <div className="text-center">
-                                    <div className="text-8xl mb-6">{item.emoji}</div>
-                                    <div className="text-[#CCCCCC] text-xl font-semibold mb-2">{item.caption}</div>
-                                    <div className="text-[#858585] text-sm">
-                                        {item.type === 'video' ? '🎥 Vidéo' : '📸 Photo'} {index + 1} / {mediaItems.length}
-                                    </div>
+            {/* Swiper Carousel */}
+            <div className="flex-1 relative overflow-hidden bg-[#1E1E1E] min-h-[calc(100vh-250px)]">
+                <Swiper
+                    onSwiper={(swiper) => { swiperRef.current = swiper; }}
+                    direction="vertical"
+                    slidesPerView={1}
+                    spaceBetween={0}
+                    mousewheel={true}
+                    pagination={{
+                        clickable: true,
+                        renderBullet: function (index, className) {
+                            return `<span class="${className} swiper-pagination-bullet-custom"></span>`;
+                        },
+                    }}
+                    modules={[Pagination, Autoplay, EffectFade]}
+                    autoplay={{
+                        delay: 3000,
+                        disableOnInteraction: false,
+                    }}
+                    speed={700}
+                    className="w-full h-full"
+                    onSlideChange={(swiper) => setCurrentSlide(swiper.activeIndex)}
+                >
+                    {media.map((item, index) => (
+                        <SwiperSlide key={index} className="flex flex-col items-center justify-center p-8">
+                            <div
+                                className="relative w-full max-w-5xl h-[calc(100vh-400px)] min-h-[400px] bg-gradient-to-br from-[#252526] to-[#1E1E1E] rounded-lg border-2 border-[#00FFFF] flex items-center justify-center overflow-hidden shadow-lg shadow-[#00FFFF]/20 cursor-pointer"
+                                onClick={handleSlideClick}
+                            >
+                                {item.isVideo ? (
+                                    <video
+                                        ref={(el) => { videoRefs.current[index] = el; }}
+                                        src={item.src}
+                                        className="w-full h-full object-contain"
+                                        autoPlay={false} // Controlled by useEffect
+                                        muted={false} // Sound enabled
+                                        playsInline
+                                    />
+                                ) : (
+                                    <img
+                                        src={item.src}
+                                        alt={item.caption}
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => {
+                                            console.error(`Error loading image: ${item.src}`);
+                                            e.currentTarget.src = 'https://via.placeholder.com/800x450?text=Image+Non+Trouvée';
+                                        }}
+                                    />
+                                )}
+                            </div>
+
+                            {/* Caption */}
+                            <div className="mt-6 max-w-4xl w-full">
+                                <div className="flex items-center justify-center gap-4 p-4 bg-[#252526] border border-[#3C3C3C] rounded-lg">
+                                    <p className="text-[#CCCCCC] text-lg flex-1 text-center italic">
+                                        {item.caption}
+                                    </p>
                                 </div>
                             </div>
-                        </div>
+                        </SwiperSlide>
                     ))}
+                </Swiper>
+            </div>
 
-                    {/* Navigation Dots */}
-                    <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
-                        {mediaItems.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentMedia(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${
-                                    index === currentMedia 
-                                        ? 'bg-[#007ACC] w-8' 
-                                        : 'bg-[#858585] hover:bg-[#CCCCCC]'
-                                }`}
-                            />
-                        ))}
-                    </div>
-                </div>
+            {/* Footer Archive Note */}
+            <div className="px-8 py-4 border-t border-[#3C3C3C] bg-[#252526]">
+                <p className="text-[#6A9955] text-xs italic text-center">
+                    <span className="text-[#569CD6]">//</span> Archives soutenances Juillet 2025 • ENSPY • Promotion GI 2025
+                </p>
             </div>
         </div>
     );

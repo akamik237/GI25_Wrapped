@@ -1,152 +1,190 @@
 "use client";
 
 import React from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 interface EditorSortiePromoProps {
     onScrollEnd?: () => void;
 }
 
 export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
-    const [currentImage, setCurrentImage] = React.useState(0);
-    const contentRef = React.useRef<HTMLDivElement>(null);
-    const [hasScrolledToEnd, setHasScrolledToEnd] = React.useState(false);
+    const [currentSlide, setCurrentSlide] = React.useState(0);
+    const swiperRef = React.useRef<SwiperType | null>(null);
+    const videoRefs = React.useRef<{[key: number]: HTMLVideoElement | null}>({});
 
-    const images = [
-        { src: '/images/sortie-1.jpg', caption: 'Moment de détente à la plage' },
-        { src: '/images/sortie-2.jpg', caption: 'Cohésion de groupe' },
-        { src: '/images/sortie-3.jpg', caption: 'Souvenirs inoubliables' },
-        { src: '/images/sortie-4.jpg', caption: 'Rires et complicité' },
+    // Images/Videos for carousel - Your actual media
+    const media = [
+        { src: "/promo-sortie/photo_1.jpg", caption: "Moments de détente et cohésion", isVideo: false },
+        { src: "/promo-sortie/video_2.MP4", caption: "Activités de groupe", isVideo: true },
+        { src: "/promo-sortie/video_3.MOV", caption: "Rires et complicité", isVideo: true },
+        { src: "/promo-sortie/photo_4.jpg", caption: "Souvenirs inoubliables", isVideo: false },
+        { src: "/promo-sortie/recap_sortie.mp4", caption: "Récapitulatif de la sortie", isVideo: true },
     ];
 
+    // Handle video playback and slide change
     React.useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentImage((prev) => (prev + 1) % images.length);
-        }, 4000);
-        return () => clearInterval(interval);
-    }, [images.length]);
-
-    // Detect scroll to end
-    React.useEffect(() => {
-        const handleScroll = () => {
-            if (!contentRef.current || hasScrolledToEnd) return;
-
-            const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
-            const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
-
-            if (isAtBottom && !hasScrolledToEnd) {
-                setHasScrolledToEnd(true);
-                if (onScrollEnd) {
-                    setTimeout(() => {
-                        onScrollEnd();
-                    }, 5000); // Wait 5 seconds before moving to next section
+        const currentMedia = media[currentSlide];
+        
+        if (!currentMedia || !swiperRef.current) return;
+        
+        if (currentMedia.isVideo) {
+            swiperRef.current.autoplay.stop();
+            
+            const videoElement = videoRefs.current[currentSlide];
+            if (videoElement) {
+                videoElement.currentTime = 0;
+                const playPromise = videoElement.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch((error) => console.log('Lecture vidéo bloquée:', error));
                 }
+                
+                const handleVideoEnd = () => {
+                    console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
+                    
+                    if (currentSlide === media.length - 1) {
+                        if (onScrollEnd) {
+                            setTimeout(() => onScrollEnd(), 2000);
+                        }
+                    } else {
+                        swiperRef.current?.slideNext();
+                    }
+                };
+                
+                videoElement.addEventListener('ended', handleVideoEnd);
+                return () => {
+                    videoElement.removeEventListener('ended', handleVideoEnd);
+                    videoElement.pause();
+                };
             }
-        };
-
-        const element = contentRef.current;
-        if (element) {
-            element.addEventListener('scroll', handleScroll);
-            return () => element.removeEventListener('scroll', handleScroll);
+        } else {
+            swiperRef.current.autoplay.start();
         }
-    }, [hasScrolledToEnd, onScrollEnd]);
+    }, [currentSlide, media, onScrollEnd]);
+
+    // Trigger next section after last slide (only for images, videos handle it themselves)
+    React.useEffect(() => {
+        const lastMedia = media[media.length - 1];
+        if (currentSlide === media.length - 1 && !lastMedia.isVideo && onScrollEnd) {
+            const timer = setTimeout(() => {
+                onScrollEnd();
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [currentSlide, media, onScrollEnd]);
+
+    const handleSlideClick = () => {
+        // Don't allow skipping during video playback
+        const currentMedia = media[currentSlide];
+        if (currentMedia?.isVideo) {
+            const videoElement = videoRefs.current[currentSlide];
+            if (videoElement && !videoElement.paused && !videoElement.ended) {
+                // Video is playing, don't skip
+                console.log('⏸ Vidéo en cours, attendez la fin');
+                return;
+            }
+        }
+        
+        // Allow navigation for images or finished videos
+        if (currentSlide < media.length - 1) {
+            swiperRef.current?.slideNext();
+        }
+    };
 
     return (
-        <div className="h-full w-full flex bg-[#1E1E1E] overflow-hidden">
-            {/* Markdown Content (Left Side) */}
-            <div ref={contentRef} className="w-1/2 overflow-y-auto p-8 font-mono text-[14px] text-[#CCCCCC] scrollbar-thin scrollbar-thumb-[#424242] scrollbar-track-transparent">
-                <h1 className="text-3xl font-bold text-[#4EC9B0] mb-6">
+        <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
+            {/* Header with minimal info */}
+            <div className="px-8 py-6 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
+                <h2 className="text-2xl font-bold text-[#00FFFF] mb-2">
                     # Sortie de la Promotion
-                </h1>
-
-                <div className="space-y-4 leading-relaxed">
-                    <p className="text-[#D4D4D4]">
-                        <span className="text-[#569CD6]">**Mois**</span> : Février 2025
-                    </p>
-
-                    <p className="text-[#D4D4D4]">
-                        <span className="text-[#569CD6]">**Objectif**</span> : Cohésion et détente
-                    </p>
-
-                    <div className="mt-6">
-                        <h2 className="text-xl font-semibold text-[#4EC9B0] mb-3">
-                            ## À propos
-                        </h2>
-                        <p className="text-[#D4D4D4] leading-7">
-                            Avant le rush des soutenances, la promotion GI 2025 s'est offert un moment de 
-                            respiration collective. Une journée de cohésion où les futurs ingénieurs ont pu 
-                            renforcer leurs liens, partager des rires et créer des souvenirs en dehors du 
-                            cadre académique strict de l'ENSPY.
-                        </p>
-                    </div>
-
-                    <div className="mt-6">
-                        <h2 className="text-xl font-semibold text-[#4EC9B0] mb-3">
-                            ## Moments forts
-                        </h2>
-                        <ul className="list-disc list-inside space-y-2 text-[#D4D4D4]">
-                            <li>Activités de team building</li>
-                            <li>Repas convivial en bord de mer</li>
-                            <li>Moments spontanés et authentiques</li>
-                            <li>Renforcement des liens interpersonnels</li>
-                        </ul>
-                    </div>
-
-                    <div className="mt-6 p-4 bg-[#2D2D30] border-l-4 border-[#4EC9B0] rounded">
-                        <p className="text-[#D4D4D4] italic">
-                            "Ces moments de détente sont essentiels dans un parcours aussi intense. 
-                            Ils nous rappellent que nous sommes avant tout une famille académique."
-                        </p>
-                        <p className="text-[#858585] text-sm mt-2">
-                            — Un membre de la promo GI 2025
-                        </p>
-                    </div>
-                </div>
+                </h2>
+                <p className="text-[#CCCCCC] text-sm mb-1">
+                    <span className="text-[#00FF00]">Date:</span> Février 2025
+                </p>
+                <p className="text-[#CCCCCC] text-sm">
+                    <span className="text-[#00FF00]">Objectif:</span> Cohésion et détente avant les soutenances
+                </p>
             </div>
 
-            {/* Markdown Preview (Right Side) - Image Carousel */}
-            <div className="w-1/2 bg-[#1E1E1E] border-l border-[#3C3C3C] flex flex-col">
-                <div className="h-10 bg-[#252526] border-b border-[#3C3C3C] flex items-center px-4 text-[13px] text-[#CCCCCC]">
-                    <span>PREVIEW</span>
-                </div>
-                
-                <div className="flex-1 relative overflow-hidden">
-                    {images.map((image, index) => (
-                        <div
-                            key={index}
-                            className={`absolute inset-0 transition-opacity duration-1000 ${
-                                index === currentImage ? 'opacity-100' : 'opacity-0'
-                            }`}
-                        >
-                            <div className="w-full h-full bg-gradient-to-br from-[#1E1E1E] to-[#2D2D30] flex items-center justify-center p-8">
-                                {/* Placeholder for images */}
-                                <div className="w-full h-full max-w-2xl max-h-2xl bg-[#3C3C3C] rounded-lg flex items-center justify-center relative overflow-hidden">
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="text-center">
-                                            <div className="text-6xl mb-4">📸</div>
-                                            <div className="text-[#CCCCCC] text-lg font-semibold">{image.caption}</div>
-                                            <div className="text-[#858585] text-sm mt-2">Image {index + 1} / {images.length}</div>
-                                        </div>
-                                    </div>
+            {/* Swiper Carousel */}
+            <div className="flex-1 overflow-hidden relative bg-[#1E1E1E]">
+                <Swiper
+                    direction="vertical"
+                    modules={[Autoplay, Pagination]}
+                    autoplay={{
+                        delay: 3000,
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: false,
+                        waitForTransition: true,
+                    }}
+                    pagination={{
+                        clickable: true,
+                        renderBullet: (index, className) => {
+                            return `<span class="${className}" style="background: #00FFFF"></span>`;
+                        },
+                    }}
+                    speed={700}
+                    allowTouchMove={false}
+                    preventInteractionOnTransition={true}
+                    onSwiper={(swiper) => {
+                        swiperRef.current = swiper;
+                    }}
+                    onSlideChange={(swiper) => {
+                        setCurrentSlide(swiper.activeIndex);
+                        console.log(`🎬 Swiper Sortie: Slide ${swiper.activeIndex + 1}`);
+                    }}
+                    className="w-full h-full"
+                    style={{ height: '100%' }}
+                >
+                    {media.map((item, index) => (
+                        <SwiperSlide key={index}>
+                            <div
+                                className="w-full h-full flex flex-col items-center justify-center p-8 cursor-pointer bg-[#1E1E1E]"
+                                onClick={handleSlideClick}
+                            >
+                                {/* Image/Video Container */}
+                                <div className="relative w-full max-w-5xl h-[500px] bg-gradient-to-br from-[#252526] to-[#1E1E1E] rounded-lg border-2 border-[#00FFFF] flex items-center justify-center overflow-hidden shadow-lg shadow-[#00FFFF]/20">
+                                    {item.isVideo ? (
+                                        <video
+                                            ref={(el) => { videoRefs.current[index] = el; }}
+                                            src={item.src}
+                                            className="max-w-full max-h-full object-contain"
+                                            playsInline
+                                            controls={false}
+                                            onLoadedMetadata={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
+                                        />
+                                    ) : (
+                                        <img
+                                            src={item.src}
+                                            alt={item.caption}
+                                            className="max-w-full max-h-full object-contain"
+                                            onLoad={() => console.log(`✓ Image ${index + 1} chargée`)}
+                                        />
+                                    )}
+                                </div>
+
+                                {/* Caption */}
+                                <div className="mt-6 max-w-5xl w-full">
+                                    <p className="text-[#CCCCCC] text-center text-lg font-light italic">
+                                        {item.caption}
+                                    </p>
                                 </div>
                             </div>
-                        </div>
+                        </SwiperSlide>
                     ))}
+                </Swiper>
+            </div>
 
-                    {/* Navigation Dots */}
-                    <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
-                        {images.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentImage(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${
-                                    index === currentImage 
-                                        ? 'bg-[#007ACC] w-6' 
-                                        : 'bg-[#858585] hover:bg-[#CCCCCC]'
-                                }`}
-                            />
-                        ))}
-                    </div>
-                </div>
+            {/* Footer Archive Note */}
+            <div className="px-8 py-5 border-t-2 border-[#00FFFF]/30 bg-[#252526] flex-shrink-0">
+                <p className="text-[#00FFFF] text-sm text-center font-mono">
+                    <span className="text-[#00FF00]">//</span> Moments de cohésion • GI 2025
+                </p>
             </div>
         </div>
     );
