@@ -92,8 +92,93 @@ export const SectionIntro = () => {
         console.log("Starting Wrapper...");
     };
 
+    // Transition to previous section
+    const goToPreviousSection = React.useCallback(() => {
+        if (currentSection <= 1) return;
+        setIsTransitioning(true);
+        
+        setTimeout(() => {
+            // Special case: sections 1 & 2 are merged in terminal
+            const prevSection = currentSection === 3 ? 1 : currentSection - 1;
+            setCurrentSection(prevSection);
+            
+            // Update layout based on section
+            switch (prevSection) {
+                case 1:
+                case 2:
+                    setLayoutMode('code');
+                    setCurrentView('main.ts');
+                    setExtensionMode('none');
+                    break;
+                case 3:
+                    setLayoutMode('markdown');
+                    setCurrentView('PromoShoot.md');
+                    setExtensionMode('none');
+                    break;
+                case 4:
+                    setLayoutMode('markdown');
+                    setCurrentView('SortiePromo.md');
+                    setExtensionMode('none');
+                    break;
+                case 5:
+                    setLayoutMode('terminal');
+                    setCurrentView('main.ts');
+                    setExtensionMode('none');
+                    break;
+                case 6:
+                    setLayoutMode('markdown');
+                    setCurrentView('Entreprises.md');
+                    setExtensionMode('none');
+                    break;
+                case 7:
+                    setLayoutMode('markdown');
+                    setCurrentView('Soutenances_Juillet.md');
+                    setExtensionMode('none');
+                    break;
+                case 8:
+                    setLayoutMode('markdown');
+                    setCurrentView('Soutenances_Septembre.md');
+                    setExtensionMode('none');
+                    break;
+                case 9:
+                    setLayoutMode('terminal');
+                    setCurrentView('main.ts');
+                    setExtensionMode('none');
+                    break;
+                case 10:
+                    setLayoutMode('extension');
+                    setExtensionMode('femmes');
+                    break;
+                case 11:
+                    setLayoutMode('extension');
+                    setExtensionMode('hommes');
+                    break;
+                case 12:
+                    setLayoutMode('markdown');
+                    setCurrentView('Communion_Cadets.md');
+                    setExtensionMode('none');
+                    break;
+                case 13:
+                    setLayoutMode('markdown');
+                    setCurrentView('BestMoments.md');
+                    setExtensionMode('none');
+                    break;
+                case 14:
+                    setLayoutMode('terminal');
+                    setCurrentView('main.ts');
+                    setExtensionMode('none');
+                    break;
+            }
+            
+            setTimeout(() => {
+                setIsTransitioning(false);
+            }, 150);
+        }, 100);
+    }, [currentSection]);
+
     // Transition to next section
     const goToNextSection = React.useCallback(() => {
+        if (currentSection >= 14) return;
         setIsTransitioning(true);
         
         setTimeout(() => {
@@ -188,7 +273,7 @@ export const SectionIntro = () => {
         : { minSize: 200 };  // Normal editor size
 
     return (
-        <div className="h-full w-full flex flex-col bg-[#1E1E1E]">
+        <div className="h-full w-full flex flex-col bg-[#1E1E1E] pb-6">
             {/* Main Content */}
             <div className="flex-1 flex min-h-0">
                 {/* Activity Bar (Icons Sidebar) - Fixed */}
@@ -410,16 +495,11 @@ export const SectionIntro = () => {
                 column={1}
                 language={currentView === 'main.ts' ? "TypeScript" : "Markdown"}
                 encoding="UTF-8"
+                onNextSection={goToNextSection}
+                onPreviousSection={goToPreviousSection}
+                currentSection={currentSection}
+                totalSections={14}
             />
-
-            {/* Debug Button - Skip to Next Section */}
-            <button
-                onClick={goToNextSection}
-                className="fixed bottom-4 right-4 z-50 bg-[#007ACC] hover:bg-[#1177BB] text-white px-4 py-2 rounded-lg shadow-lg font-semibold text-sm transition-all hover:scale-105 active:scale-95"
-                title={`Section ${currentSection}/14 - Click to skip to next`}
-            >
-                ⏭️ Next Section ({currentSection}/14)
-            </button>
                 </div>
     );
 };
