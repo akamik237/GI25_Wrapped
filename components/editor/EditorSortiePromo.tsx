@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
@@ -10,14 +11,17 @@ import { Badge, BadgeGroup } from '@/components/ui/Badge';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
+// Import ReactPlayer dynamically for better performance
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
+
 interface EditorSortiePromoProps {
     onScrollEnd?: () => void;
 }
 
 export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
     const [currentSlide, setCurrentSlide] = React.useState(0);
+    const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
     const swiperRef = React.useRef<SwiperType | null>(null);
-    const videoRefs = React.useRef<{[key: number]: HTMLVideoElement | null}>({});
 
     // Images/Videos for carousel - Your actual media
     const media = [
@@ -28,7 +32,7 @@ export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
         { src: "/promo-sortie/recap_sortie.mp4", caption: "Récapitulatif de la sortie", isVideo: true },
     ];
 
-    // Handle video playback and slide change
+    // Handle video playback and autoplay
     React.useEffect(() => {
         const currentMedia = media[currentSlide];
         
@@ -36,37 +40,12 @@ export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
         
         if (currentMedia.isVideo) {
             swiperRef.current.autoplay.stop();
-            
-            const videoElement = videoRefs.current[currentSlide];
-            if (videoElement) {
-                videoElement.currentTime = 0;
-                const playPromise = videoElement.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch((error) => console.log('Lecture vidéo bloquée:', error));
-                }
-                
-                const handleVideoEnd = () => {
-                    console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
-                    
-                    if (currentSlide === media.length - 1) {
-                        if (onScrollEnd) {
-                            setTimeout(() => onScrollEnd(), 2000);
-                        }
-                    } else {
-                        swiperRef.current?.slideNext();
-                    }
-                };
-                
-                videoElement.addEventListener('ended', handleVideoEnd);
-                return () => {
-                    videoElement.removeEventListener('ended', handleVideoEnd);
-                    videoElement.pause();
-                };
-            }
+            setIsVideoPlaying(true);
         } else {
             swiperRef.current.autoplay.start();
+            setIsVideoPlaying(false);
         }
-    }, [currentSlide, media, onScrollEnd]);
+    }, [currentSlide, media]);
 
     // Trigger next section after last slide (only for images, videos handle it themselves)
     React.useEffect(() => {
@@ -79,16 +58,26 @@ export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
         }
     }, [currentSlide, media, onScrollEnd]);
 
+    // Handle video end callback
+    const handleVideoEnd = () => {
+        console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
+        
+        if (currentSlide === media.length - 1) {
+            if (onScrollEnd) {
+                setTimeout(() => onScrollEnd(), 2000);
+            }
+        } else {
+            setIsVideoPlaying(false);
+            swiperRef.current?.slideNext();
+        }
+    };
+
     const handleSlideClick = () => {
         // Don't allow skipping during video playback
         const currentMedia = media[currentSlide];
-        if (currentMedia?.isVideo) {
-            const videoElement = videoRefs.current[currentSlide];
-            if (videoElement && !videoElement.paused && !videoElement.ended) {
-                // Video is playing, don't skip
-                console.log('⏸ Vidéo en cours, attendez la fin');
-                return;
-            }
+        if (currentMedia?.isVideo && isVideoPlaying) {
+            console.log('⏸ Vidéo en cours, attendez la fin');
+            return;
         }
         
         // Allow navigation for images or finished videos
@@ -167,13 +156,27 @@ export const EditorSortiePromo = ({ onScrollEnd }: EditorSortiePromoProps) => {
                                 {/* Image/Video Container */}
                                 <div className="relative w-full max-w-5xl h-[500px] bg-gradient-to-br from-[#252526] to-[#1E1E1E] rounded-lg border-2 border-[#00FFFF] flex items-center justify-center overflow-hidden shadow-lg shadow-[#00FFFF]/20">
                                     {item.isVideo ? (
-                                        <video
-                                            ref={(el) => { videoRefs.current[index] = el; }}
-                                            src={item.src}
-                                            className="max-w-full max-h-full object-contain"
-                                            playsInline
+                                        <ReactPlayer
+                                            url={item.src}
+                                            playing={index === currentSlide && isVideoPlaying}
+                                            onEnded={handleVideoEnd}
+                                            onReady={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
+                                            width="100%"
+                                            height="100%"
+                                            style={{ maxWidth: '100%', maxHeight: '100%' }}
+                                            config={{
+                                                file: {
+                                                    attributes: {
+                                                        playsInline: true,
+                                                        controlsList: 'nodownload',
+                                                        disablePictureInPicture: true,
+                                                    }
+                                                }
+                                            }}
+                                            volume={1}
+                                            muted={false}
                                             controls={false}
-                                            onLoadedMetadata={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
+                                            playsinline
                                         />
                                     ) : (
                                         <img

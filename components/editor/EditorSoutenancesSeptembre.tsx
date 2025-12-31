@@ -1,12 +1,16 @@
 "use client";
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { Badge, BadgeGroup } from '@/components/ui/Badge';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
+
+// Import ReactPlayer dynamically for better performance
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface EditorSoutenancesSeptembreProps {
     onScrollEnd?: () => void;
@@ -20,8 +24,8 @@ interface MediaItem {
 
 export const EditorSoutenancesSeptembre = ({ onScrollEnd }: EditorSoutenancesSeptembreProps) => {
     const [currentSlide, setCurrentSlide] = React.useState(0);
+    const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
     const swiperRef = React.useRef<any>(null);
-    const videoRefs = React.useRef<(HTMLVideoElement | null)[]>([]);
 
     const media: MediaItem[] = [
         { src: "/soutenances-septembre/Recap1.mp4", caption: "Jour 1 - Reprise des soutenances en septembre", isVideo: true },
@@ -42,6 +46,7 @@ export const EditorSoutenancesSeptembre = ({ onScrollEnd }: EditorSoutenancesSep
     ];
 
     // Handle video playback and slide change
+    // Handle video playback and autoplay
     React.useEffect(() => {
         const currentMedia = media[currentSlide];
 
@@ -50,42 +55,32 @@ export const EditorSoutenancesSeptembre = ({ onScrollEnd }: EditorSoutenancesSep
         if (currentMedia.isVideo) {
             swiperRef.current.autoplay.stop();
             swiperRef.current.allowTouchMove = false; // Disable swipe during video
-
-            const videoElement = videoRefs.current[currentSlide];
-            if (videoElement) {
-                videoElement.currentTime = 0;
-                const playPromise = videoElement.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch((error) => console.log('Lecture vidéo bloquée:', error));
-                }
-
-                const handleEnded = () => {
-                    if (swiperRef.current) {
-                        swiperRef.current.allowTouchMove = true; // Re-enable swipe
-                        
-                        if (currentSlide < media.length - 1) {
-                            swiperRef.current.slideNext();
-                        } else {
-                            // Last video ended, wait 2 seconds then call onScrollEnd
-                            setTimeout(() => {
-                                if (onScrollEnd) {
-                                    onScrollEnd();
-                                }
-                            }, 2000);
-                        }
-                    }
-                };
-
-                videoElement.addEventListener('ended', handleEnded);
-                return () => {
-                    videoElement.removeEventListener('ended', handleEnded);
-                };
-            }
+            setIsVideoPlaying(true);
         } else {
             swiperRef.current.autoplay.start();
             swiperRef.current.allowTouchMove = true;
+            setIsVideoPlaying(false);
         }
-    }, [currentSlide, media.length, onScrollEnd]);
+    }, [currentSlide, media.length]);
+
+    // Handle video end callback
+    const handleVideoEnd = () => {
+        if (swiperRef.current) {
+            swiperRef.current.allowTouchMove = true; // Re-enable swipe
+            
+            if (currentSlide < media.length - 1) {
+                setIsVideoPlaying(false);
+                swiperRef.current.slideNext();
+            } else {
+                // Last video ended, wait 2 seconds then call onScrollEnd
+                setTimeout(() => {
+                    if (onScrollEnd) {
+                        onScrollEnd();
+                    }
+                }, 2000);
+            }
+        }
+    };
 
     const handleSlideChange = (swiper: any) => {
         setCurrentSlide(swiper.activeIndex);
@@ -147,11 +142,27 @@ export const EditorSoutenancesSeptembre = ({ onScrollEnd }: EditorSoutenancesSep
                                 {/* Media Container */}
                                 <div className="flex-1 flex items-center justify-center p-4 bg-black/50">
                                     {item.isVideo ? (
-                                        <video
-                                            ref={(el) => { videoRefs.current[index] = el; }}
-                                            src={item.src}
-                                            className="max-w-full max-h-full object-contain"
-                                            playsInline
+                                        <ReactPlayer
+                                            url={item.src}
+                                            playing={index === currentSlide && isVideoPlaying}
+                                            onEnded={handleVideoEnd}
+                                            onReady={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
+                                            width="100%"
+                                            height="100%"
+                                            style={{ maxWidth: '100%', maxHeight: '100%' }}
+                                            config={{
+                                                file: {
+                                                    attributes: {
+                                                        playsInline: true,
+                                                        controlsList: 'nodownload',
+                                                        disablePictureInPicture: true,
+                                                    }
+                                                }
+                                            }}
+                                            volume={1}
+                                            muted={false}
+                                            controls={false}
+                                            playsinline
                                         />
                                     ) : (
                                         <img

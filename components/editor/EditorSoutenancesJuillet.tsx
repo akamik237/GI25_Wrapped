@@ -1,12 +1,16 @@
 "use client";
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { Badge, BadgeGroup } from '@/components/ui/Badge';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
+
+// Import ReactPlayer dynamically for better performance
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface EditorSoutenancesJuilletProps {
     onScrollEnd?: () => void;
@@ -20,8 +24,8 @@ interface MediaItem {
 
 export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuilletProps) => {
     const [currentSlide, setCurrentSlide] = React.useState(0);
+    const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
     const swiperRef = React.useRef<any>(null);
-    const videoRefs = React.useRef<(HTMLVideoElement | null)[]>([]);
 
     const media: MediaItem[] = [
         { src: "/soutenances-juillet/Recap_1.mp4", caption: "Jour 1 - Première journée de soutenances", isVideo: true },
@@ -32,6 +36,7 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
     ];
 
     // Handle video playback and slide change
+    // Handle video playback and autoplay
     React.useEffect(() => {
         const currentMedia = media[currentSlide];
 
@@ -40,40 +45,30 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
         if (currentMedia.isVideo) {
             swiperRef.current.autoplay.stop();
             swiperRef.current.allowTouchMove = false; // Disable swipe during video
-
-            const videoElement = videoRefs.current[currentSlide];
-            if (videoElement) {
-                videoElement.currentTime = 0;
-                const playPromise = videoElement.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch((error) => console.log('Lecture vidéo bloquée:', error));
-                }
-
-                const handleVideoEnd = () => {
-                    console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
-                    swiperRef.current.allowTouchMove = true; // Re-enable swipe
-
-                    if (currentSlide === media.length - 1) {
-                        if (onScrollEnd) {
-                            setTimeout(() => onScrollEnd(), 2000); // 2s delay for last video
-                        }
-                    } else {
-                        swiperRef.current?.slideNext();
-                    }
-                };
-
-                videoElement.addEventListener('ended', handleVideoEnd);
-                return () => {
-                    videoElement.removeEventListener('ended', handleVideoEnd);
-                    videoElement.pause();
-                    swiperRef.current.allowTouchMove = true; // Ensure swipe is re-enabled on unmount/cleanup
-                };
-            }
+            setIsVideoPlaying(true);
         } else {
             swiperRef.current.allowTouchMove = true; // Enable swipe for images
             swiperRef.current.autoplay.start();
+            setIsVideoPlaying(false);
         }
-    }, [currentSlide, media, onScrollEnd]);
+    }, [currentSlide, media]);
+
+    // Handle video end callback
+    const handleVideoEnd = () => {
+        console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
+        if (swiperRef.current) {
+            swiperRef.current.allowTouchMove = true; // Re-enable swipe
+        }
+
+        if (currentSlide === media.length - 1) {
+            if (onScrollEnd) {
+                setTimeout(() => onScrollEnd(), 2000); // 2s delay for last video
+            }
+        } else {
+            setIsVideoPlaying(false);
+            swiperRef.current?.slideNext();
+        }
+    };
 
     const handleSlideClick = () => {
         const currentMedia = media[currentSlide];
@@ -145,13 +140,27 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
                                 onClick={handleSlideClick}
                             >
                                 {item.isVideo ? (
-                                    <video
-                                        ref={(el) => { videoRefs.current[index] = el; }}
-                                        src={item.src}
-                                        className="w-full h-full object-contain"
-                                        autoPlay={false} // Controlled by useEffect
-                                        muted={false} // Sound enabled
-                                        playsInline
+                                    <ReactPlayer
+                                        url={item.src}
+                                        playing={index === currentSlide && isVideoPlaying}
+                                        onEnded={handleVideoEnd}
+                                        onReady={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
+                                        width="100%"
+                                        height="100%"
+                                        style={{ width: '100%', height: '100%' }}
+                                        config={{
+                                            file: {
+                                                attributes: {
+                                                    playsInline: true,
+                                                    controlsList: 'nodownload',
+                                                    disablePictureInPicture: true,
+                                                }
+                                            }
+                                        }}
+                                        volume={1}
+                                        muted={false}
+                                        controls={false}
+                                        playsinline
                                     />
                                 ) : (
                                     <img
