@@ -55,16 +55,17 @@ export const EditorEntreprises = ({ onScrollEnd }: EditorEntreprisesProps) => {
                 setDisplayedLines(currentLine + 1);
                 currentLine++;
                 // Slower for header lines (0-7), faster for companies
-                const delay = currentLine < 8 ? 150 : 80; // 150ms for header, 80ms per company
+                // Délais multipliés par 4 pour ralentir le défilement
+                const delay = currentLine < 8 ? 600 : 320; // 600ms for header, 320ms per company
                 setTimeout(typeLine, delay);
             } else {
                 setIsComplete(true);
-                // Auto-transition after 5 seconds
+                // Auto-transition after longer delay (increased from 5s to 8s)
                 setTimeout(() => {
                     if (onScrollEnd) {
                         onScrollEnd();
                     }
-                }, 5000);
+                }, 8000);
             }
         };
 

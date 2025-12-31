@@ -1,16 +1,12 @@
 "use client";
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import { Badge, BadgeGroup } from '@/components/ui/Badge';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
-// Import ReactPlayer dynamically for better performance
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface EditorSoutenancesJuilletProps {
     onScrollEnd?: () => void;
@@ -26,13 +22,15 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
     const [currentSlide, setCurrentSlide] = React.useState(0);
     const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
     const swiperRef = React.useRef<any>(null);
+    const videoRefs = React.useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
     const media: MediaItem[] = [
-        { src: "/soutenances-juillet/Recap_1.mp4", caption: "Jour 1 - Première journée de soutenances", isVideo: true },
-        { src: "/soutenances-juillet/Recap_2.mp4", caption: "Jour 2 - Défenses et présentations", isVideo: true },
-        { src: "/soutenances-juillet/Recap_3.mp4", caption: "Jour 3 - Soutenances en série", isVideo: true },
-        { src: "/soutenances-juillet/Recap_4.mp4", caption: "Jour 4 - Passages devant le jury", isVideo: true },
-        { src: "/soutenances-juillet/Recap_5.mp4", caption: "Jour 5 - Derniers passages de juillet", isVideo: true },
+        { src: "/soutenances-juillet/Recap_1.mp4", caption: "Jour 1", isVideo: true },
+        { src: "/soutenances-juillet/Recap_2.mp4", caption: "Jour 2", isVideo: true },
+        { src: "/soutenances-juillet/Recap_3.mp4", caption: "Jour 3", isVideo: true },
+        { src: "/soutenances-juillet/Recap_4.mp4", caption: "Jour 4", isVideo: true },
+        { src: "/soutenances-juillet/Recap5.mp4", caption: "Jour 5", isVideo: true },
+        { src: "/soutenances-juillet/Recap_6.mp4", caption: "Jour 6", isVideo: true },
     ];
 
     // Handle video playback and slide change
@@ -46,7 +44,21 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
             swiperRef.current.autoplay.stop();
             swiperRef.current.allowTouchMove = false; // Disable swipe during video
             setIsVideoPlaying(true);
+            
+            // Play the current video
+            const video = videoRefs.current[currentSlide];
+            if (video) {
+                video.play().catch(err => {
+                    console.warn('Erreur lecture vidéo:', err);
+                });
+            }
         } else {
+            // Pause all videos
+            Object.values(videoRefs.current).forEach(video => {
+                if (video && !video.paused) {
+                    video.pause();
+                }
+            });
             swiperRef.current.allowTouchMove = true; // Enable swipe for images
             swiperRef.current.autoplay.start();
             setIsVideoPlaying(false);
@@ -62,7 +74,7 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
 
         if (currentSlide === media.length - 1) {
             if (onScrollEnd) {
-                setTimeout(() => onScrollEnd(), 2000); // 2s delay for last video
+                setTimeout(() => onScrollEnd(), 1000); // 1s delay for last video
             }
         } else {
             setIsVideoPlaying(false);
@@ -84,17 +96,10 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
         <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
             {/* Header with detailed info */}
             <div className="px-8 py-6 border-b border-[#3C3C3C]">
-                <h2 className="text-2xl font-bold text-[#00FFFF] mb-3">
+                <h2 className="text-2xl font-bold text-[#00FFFF] mt-6 mb-3">
                     # Soutenances de Juillet 2025
                 </h2>
                 
-                {/* Badges */}
-                <BadgeGroup>
-                    <Badge label="candidats" value="~45" colorScheme="green" />
-                    <Badge label="taux réussite" value="100%" colorScheme="green" />
-                    <Badge label="durée moyenne" value="45 min" colorScheme="blue" />
-                    <Badge label="période" value="juillet 2025" colorScheme="red" />
-                </BadgeGroup>
                 
                 <p className="text-[#CCCCCC] text-sm mb-3">
                     <span className="text-[#569CD6]">Période:</span> Juillet 2025 • <span className="text-[#569CD6]">Candidats:</span> Première vague (~45 étudiants)
@@ -140,33 +145,24 @@ export const EditorSoutenancesJuillet = ({ onScrollEnd }: EditorSoutenancesJuill
                                 onClick={handleSlideClick}
                             >
                                 {item.isVideo ? (
-                                    <ReactPlayer
-                                        url={item.src}
-                                        playing={index === currentSlide && isVideoPlaying}
-                                        onEnded={handleVideoEnd}
-                                        onReady={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
-                                        width="100%"
-                                        height="100%"
-                                        style={{ width: '100%', height: '100%' }}
-                                        config={{
-                                            file: {
-                                                attributes: {
-                                                    playsInline: true,
-                                                    controlsList: 'nodownload',
-                                                    disablePictureInPicture: true,
-                                                }
-                                            }
+                                    <video
+                                        ref={(el) => {
+                                            videoRefs.current[index] = el;
                                         }}
-                                        volume={1}
-                                        muted={false}
-                                        controls={false}
-                                        playsinline
+                                        src={item.src}
+                                        className="w-full h-full object-contain"
+                                        playsInline
+                                        preload="auto"
+                                        onEnded={handleVideoEnd}
+                                        onLoadedData={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
+                                        style={{ width: '100%', height: '100%' }}
                                     />
                                 ) : (
                                     <img
                                         src={item.src}
                                         alt={item.caption}
                                         className="w-full h-full object-contain"
+                                        loading={index <= currentSlide + 1 ? "eager" : "lazy"}
                                         onError={(e) => {
                                             console.error(`Error loading image: ${item.src}`);
                                             e.currentTarget.src = 'https://via.placeholder.com/800x450?text=Image+Non+Trouvée';

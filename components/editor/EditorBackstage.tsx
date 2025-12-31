@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { Badge, BadgeGroup } from '@/components/ui/Badge';
 
 interface EditorBackstageProps {
     onScrollEnd?: () => void;
@@ -28,17 +27,10 @@ export const EditorBackstage = ({ onScrollEnd }: EditorBackstageProps) => {
         <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
             {/* Header with badges and detailed info */}
             <div className="px-8 py-6 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
-                <h2 className="text-2xl font-bold text-[#FFA500] mb-3">
+                <h2 className="text-2xl font-bold text-[#FFA500] mt-6 mb-3">
                     # Backstage - Coulisses des Soutenances
                 </h2>
                 
-                {/* Badges */}
-                <BadgeGroup>
-                    <Badge label="type" value="off-camera" colorScheme="orange" />
-                    <Badge label="moments" value="authentiques" colorScheme="blue" />
-                    <Badge label="période" value="juillet-sept" colorScheme="red" />
-                    <Badge label="esprit" value="solidarité" colorScheme="green" />
-                </BadgeGroup>
 
                 {/* Detailed Description */}
                 <div className="space-y-3 text-[#CCCCCC] text-sm leading-relaxed">

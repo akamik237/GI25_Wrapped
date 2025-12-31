@@ -1,6 +1,7 @@
 import React from "react";
 import { EditorCursor } from "./EditorCursor";
 import { generateAsciiTextSync, ASCII_FONTS, ASCII_ART, GRADUATION_CAP_FRAMES } from "@/lib/ascii";
+import { getTerminalSoundManager } from "@/lib/terminalSounds";
 
 interface EditorTerminalProps {
     className?: string;
@@ -48,14 +49,19 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
 
     const runBootSequence = async () => {
         setIsBooting(true);
-        const addToHistory = (text: string, color?: string, className?: string) => 
+        const soundManager = getTerminalSoundManager();
+        const addToHistory = (text: string, color?: string, className?: string) => {
             setHistory(prev => [...prev, { text, color, className }]);
+            // Play random sound on text addition
+            soundManager.playOnTyping();
+        };
 
         // Cyberpunk boot sequence
         addToHistory("");
+        soundManager.playOnSystemCheck();
         addToHistory(">>> INIT_WRAPPED_2025", "#FF00FF");
         await new Promise(r => setTimeout(r, 200));
-        
+
         // ASCII Art - GI 2025
         addToHistory("");
         let asciiGI: string;
@@ -82,6 +88,7 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
         
         for (let i = 0; i < 6; i++) {
             addToHistory(glitchTitles[i % glitchTitles.length], i % 2 === 0 ? "#FF00FF" : "#00FFFF");
+            soundManager.playOnGlitch();
             await new Promise(r => setTimeout(r, 100));
             if (i < 5) setHistory(prev => prev.slice(0, -1));
         }
@@ -91,35 +98,7 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
         addToHistory("");
         addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#FF00FF");
         await new Promise(r => setTimeout(r, 150));
-
-        // System boot - Cyberpunk style
-        addToHistory("");
-        const systems = [
-            { name: "NEURAL.LINK", symbol: "◉", color: "#00FFFF" },
-            { name: "DATABASE.SYS", symbol: "◉", color: "#00FFFF" },
-            { name: "CYBERWARE.DRV", symbol: "◉", color: "#00FFFF" },
-            { name: "NETRUNNER.EXE", symbol: "◉", color: "#00FFFF" }
-        ];
-
-        for (const sys of systems) {
-            addToHistory(`[${sys.symbol}] ${sys.name}`, "#666666");
-            await new Promise(r => setTimeout(r, 200));
-            setHistory(prev => {
-                const newHist = [...prev];
-                newHist[newHist.length - 1] = { 
-                    text: `[✓] ${sys.name} ▸ ONLINE`, 
-                    color: sys.color 
-                };
-                return newHist;
-            });
-        }
         
-        await new Promise(r => setTimeout(r, 300));
-
-        // Neon loading bar
-        addToHistory("");
-        addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#FF00FF");
-        addToHistory("");
         
         const total = 15;
         setHistory(prev => [...prev, { 
@@ -141,6 +120,7 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
                 return newHistory;
             });
 
+            soundManager.playOnLoading();
             await new Promise(r => setTimeout(r, 60));
         }
 
@@ -148,7 +128,7 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
 
         // Credits animation - Designed and Developed by
         addToHistory("");
-        addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FFFF");
+        addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FFFF");
         addToHistory("");
         await new Promise(r => setTimeout(r, 200));
         
@@ -156,9 +136,10 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
         await new Promise(r => setTimeout(r, 500));
         
         addToHistory("");
-        addToHistory("  ▀▀█▀▀ █ █ █▀▀ ▄▀█ █▀▄▀█ █ █▀▀ █ █ █ █▀▄ █ █ █ █ █ █ █ █▀▀", "#00FFFF", "text-base sm:text-lg font-black");
+        // ASCII art version
+        addToHistory("  ▀▀█▀▀ █ █ █▀▀ ▄▀█ █▀▄▀█ █ █▀▀ █ █ █ █▀▄ █ █ █ █ █ █ █ █▀▀", "#00FFFF", "text-xs sm:text-base md:text-lg font-black");
         await new Promise(r => setTimeout(r, 150));
-        addToHistory("    █   █▀█ ██▄ █▀█ █ ▀ █ █ █▄▄ ▀▄▀ █ █ ▀▄▀ █▄█ █ █▄█ ▄▄█", "#00FFFF", "text-base sm:text-lg font-black");
+        addToHistory("    █   █▀█ ██▄ █▀█ █ ▀ █ █ █▄▄ ▀▄▀ █ █ ▀▄▀ █▄█ █ █▄█ ▄▄█", "#00FFFF", "text-xs sm:text-base md:text-lg font-black");
         await new Promise(r => setTimeout(r, 400));
         
         // AKAMIK VIZUALZ with glitch effect
@@ -176,15 +157,16 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
             if (i < 5) setHistory(prev => prev.slice(0, -1));
         }
         await new Promise(r => setTimeout(r, 600));
-        
+
         addToHistory("");
         addToHistory("                         &", "#FF00FF", "text-2xl sm:text-3xl font-black");
         await new Promise(r => setTimeout(r, 400));
         
         addToHistory("");
-        addToHistory("  ▀█▀ █ █ ██▄ █   ▄▀█ ▄▀▀ █ █ █ █   ▀█▀ █ █ █ ██▄ █▀▄ █▀▄ ▀▄▀", "#00FF00", "text-base sm:text-lg font-black");
+        // ASCII art version
+        addToHistory("  ▀█▀ █ █ ██▄ █   ▄▀█ ▄▀▀ █ █ █ █   ▀█▀ █ █ █ ██▄ █▀▄ █▀▄ ▀▄▀", "#00FF00", "text-xs sm:text-base md:text-lg font-black");
         await new Promise(r => setTimeout(r, 150));
-        addToHistory("   █  █▀█ ██▄ █▄▄ █▀█ ▄█▄ █▀█ █▄█    █  █▀█ █ ██▄ █▀▄ █▀▄ ▀▄▀", "#00FF00", "text-base sm:text-lg font-black");
+        addToHistory("   █  █▀█ ██▄ █▄▄ █▀█ ▄█▄ █▀█ █▄█    █  █▀█ █ ██▄ █▀▄ █▀▄ ▀▄▀", "#00FF00", "text-xs sm:text-base md:text-lg font-black");
         await new Promise(r => setTimeout(r, 400));
         
         // LASHU THIERRY with glitch effect
@@ -204,17 +186,17 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
         await new Promise(r => setTimeout(r, 700));
         
         addToHistory("");
-        addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FFFF");
+        addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FFFF");
         addToHistory("");
         await new Promise(r => setTimeout(r, 500));
 
         setIsBooting(false);
         setBootComplete(true);
         if (onRun) onRun();
-        
-        // Auto-transition to Section 3 (PromoShoot) after 3 seconds
+
+        // Auto-transition to Section 3 (PromoShoot) after 2 seconds
         // Sections 1 & 2 are merged, so we skip directly to section 3
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 2000));
         if (onScrollEnd) {
             console.log('✓ Boot complete - Auto-transition to PromoShoot (Section 3)');
             onScrollEnd();
@@ -237,8 +219,8 @@ export const EditorTerminal = ({ className = "", onRun, onScrollEnd }: EditorTer
 
         if (trimmed.toLowerCase() === "run" || trimmed.toLowerCase() === "init_wrapped_2025") {
             if (!isBooting && !bootComplete) {
-                setInput("");
-                runBootSequence();
+            setInput("");
+            runBootSequence();
             }
             return;
         }

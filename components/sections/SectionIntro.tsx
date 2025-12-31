@@ -16,11 +16,10 @@ import { EditorSortiePromo } from "../editor/EditorSortiePromo";
 import { EditorEntreprises } from "../editor/EditorEntreprises";
 import { EditorSoutenancesJuillet } from "../editor/EditorSoutenancesJuillet";
 import { EditorSoutenancesSeptembre } from "../editor/EditorSoutenancesSeptembre";
-import { EditorBackstage } from "../editor/EditorBackstage";
 import { EditorCommunion } from "../editor/EditorCommunion";
-import { EditorPhotoGroupe } from "../editor/EditorPhotoGroupe";
+import { EditorBestMoments } from "../editor/EditorBestMoments";
 import { EditorStatusBar } from "../editor/EditorStatusBar";
-import { TOP_TENUES_FEMMES, TOP_TENUES_HOMMES, MOMENTS_ICONIQUES, HIGHLIGHTS_FINAUX } from "@/data/tops";
+import { TOP_TENUES_FEMMES, TOP_TENUES_HOMMES, MOMENTS_ICONIQUES } from "@/data/tops";
 
 type LayoutMode = 'code' | 'markdown' | 'extension' | 'terminal';
 type CurrentView = 
@@ -30,9 +29,8 @@ type CurrentView =
     | 'Entreprises.md'
     | 'Soutenances_Juillet.md'
     | 'Soutenances_Septembre.md'
-    | 'Backstage.md'
     | 'Communion_Cadets.md'
-    | 'PhotoGroupe.md';
+    | 'BestMoments.md';
 
 export const SectionIntro = () => {
     const [typedLines, setTypedLines] = React.useState<number>(0);
@@ -43,7 +41,7 @@ export const SectionIntro = () => {
     const [currentSection, setCurrentSection] = React.useState(1); // 1: intro, 2: promo, 3: promo-shoot, 4: sortie
     const [layoutMode, setLayoutMode] = React.useState<LayoutMode>('code');
     const [currentView, setCurrentView] = React.useState<CurrentView>('main.ts');
-    const [extensionMode, setExtensionMode] = React.useState<'none' | 'femmes' | 'hommes' | 'moments' | 'highlights'>('none');
+    const [extensionMode, setExtensionMode] = React.useState<'none' | 'femmes' | 'hommes' | 'moments'>('none');
     const [isTransitioning, setIsTransitioning] = React.useState(false);
 
     // Code content configuration
@@ -135,7 +133,7 @@ export const SectionIntro = () => {
                     setCurrentView('Soutenances_Septembre.md');
                     setExtensionMode('none');
                     break;
-                case 9: // Mentions (Terminal)
+                case 9: // Mentions (Terminal) - Evaluation Engine
                     setLayoutMode('terminal');
                     setCurrentView('main.ts');
                     setExtensionMode('none');
@@ -148,30 +146,17 @@ export const SectionIntro = () => {
                     setLayoutMode('extension');
                     setExtensionMode('hommes');
                     break;
-                case 12: // Moments Iconiques (Extension)
-                    setLayoutMode('extension');
-                    setExtensionMode('moments');
-                    break;
-                case 13: // Backstage
-                    setLayoutMode('markdown');
-                    setCurrentView('Backstage.md');
-                    setExtensionMode('none');
-                    break;
-                case 14: // Communion
+                case 12: // Communion Cadets
                     setLayoutMode('markdown');
                     setCurrentView('Communion_Cadets.md');
                     setExtensionMode('none');
                     break;
-                case 15: // Photo Groupe
+                case 13: // Best Moments (Markdown)
                     setLayoutMode('markdown');
-                    setCurrentView('PhotoGroupe.md');
+                    setCurrentView('BestMoments.md');
                     setExtensionMode('none');
                     break;
-                case 16: // Highlights (Extension)
-                    setLayoutMode('extension');
-                    setExtensionMode('highlights');
-                    break;
-                case 17: // Closing (Terminal)
+                case 14: // Closing (Terminal)
                     setLayoutMode('terminal');
                     setCurrentView('main.ts');
                     setExtensionMode('none');
@@ -180,8 +165,8 @@ export const SectionIntro = () => {
             
             setTimeout(() => {
                 setIsTransitioning(false);
-            }, 300);
-        }, 200);
+            }, 150);
+        }, 100);
     }, [currentSection]);
 
     const handleScrollEnd = () => {
@@ -190,10 +175,10 @@ export const SectionIntro = () => {
     };
 
     const showExtensionPanel = extensionMode !== 'none';
-    const showTerminalPanel = (showTerminal && currentSection <= 2) || currentSection === 5 || currentSection === 9 || currentSection === 17;
+    const showTerminalPanel = (showTerminal && currentSection <= 2) || currentSection === 5 || currentSection === 9 || currentSection === 14;
     
     // Terminal size based on section type
-    const isFullTerminalSection = currentSection <= 2 || currentSection === 5 || currentSection === 9 || currentSection === 17;
+    const isFullTerminalSection = currentSection <= 2 || currentSection === 5 || currentSection === 9 || currentSection === 14;
     const terminalSize = isFullTerminalSection
         ? { preferredSize: 700, minSize: 500, maxSize: 900 }  // Full terminal sections - bigger (1, 2, 5, 10, 17)
         : { preferredSize: 400, minSize: 150, maxSize: 600 };  // Regular sections with code
@@ -213,7 +198,7 @@ export const SectionIntro = () => {
                 <Allotment className="flex-1">
                     {/* Extensions Panel - Conditional */}
                     {showExtensionPanel && (
-                        <Allotment.Pane minSize={250} maxSize={350} preferredSize={280}>
+                        <Allotment.Pane minSize={320} maxSize={450} preferredSize={380}>
                             {extensionMode === 'femmes' && (
                                 <EditorExtensions 
                                     title="Top 5 Tenues Femmes" 
@@ -235,19 +220,12 @@ export const SectionIntro = () => {
                                     onScrollEnd={handleScrollEnd}
                                 />
                             )}
-                            {extensionMode === 'highlights' && (
-                                <EditorExtensions 
-                                    title="Highlights Finaux" 
-                                    items={HIGHLIGHTS_FINAUX}
-                                    onScrollEnd={handleScrollEnd}
-                                />
-                            )}
                         </Allotment.Pane>
                     )}
                     
                     {/* Main Editor Area */}
                     <Allotment.Pane>
-                        <div className={`h-full flex flex-col overflow-hidden transition-opacity duration-300 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
+                        <div className={`h-full flex flex-col overflow-hidden transition-opacity duration-150 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
                     {/* Tabs Bar - VS Code Style */}
                     <div className="flex items-center h-11 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0 overflow-x-auto scrollbar-thin scrollbar-thumb-[#424242] scrollbar-track-transparent">
                         {/* Overview tab (main.ts) */}
@@ -311,7 +289,7 @@ export const SectionIntro = () => {
                         {/* Soutenances Septembre tab */}
                         {currentSection >= 8 && (
                             <div 
-                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Soutenances_Septembre.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Soutenances_Septembre.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#FF00FF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
                                 onClick={() => setCurrentView('Soutenances_Septembre.md')}
                             >
                                 <FileText size={16} className="text-[#519ABA]" />
@@ -320,41 +298,30 @@ export const SectionIntro = () => {
                             </div>
                         )}
 
-                        {/* Backstage tab */}
-                        {currentSection >= 13 && (
+                        {/* Communion Cadets tab */}
+                        {currentSection >= 12 && (
                             <div 
-                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Backstage.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
-                                onClick={() => setCurrentView('Backstage.md')}
-                            >
-                                <FileText size={16} className="text-[#519ABA]" />
-                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">backstage.md</span>
-                                <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
-                            </div>
-                        )}
-
-                        {/* Communion tab */}
-                        {currentSection >= 14 && (
-                            <div 
-                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Communion_Cadets.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'Communion_Cadets.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#CE9178]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
                                 onClick={() => setCurrentView('Communion_Cadets.md')}
                             >
                                 <FileText size={16} className="text-[#519ABA]" />
-                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">communion.md</span>
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">communion-cadets.md</span>
                                 <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
                             </div>
                         )}
 
-                        {/* Photo Groupe tab */}
-                        {currentSection >= 15 && (
+                        {/* Best Moments tab */}
+                        {currentSection >= 13 && (
                             <div 
-                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'PhotoGroupe.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#00FFFF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
-                                onClick={() => setCurrentView('PhotoGroupe.md')}
+                                className={`flex items-center gap-2 px-3 h-full border-r border-[#3C3C3C] transition-colors cursor-pointer flex-shrink-0 group ${currentView === 'BestMoments.md' ? 'bg-[#1E1E1E] border-t-2 border-t-[#FF00FF]' : 'bg-[#2D2D30] hover:bg-[#2A2D2E]'}`}
+                                onClick={() => setCurrentView('BestMoments.md')}
                             >
                                 <FileText size={16} className="text-[#519ABA]" />
-                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">photo-groupe.md</span>
+                                <span className="text-[14px] text-[#CCCCCC] whitespace-nowrap font-medium">best-moments.md</span>
                                 <X size={14} className="text-[#858585] opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
                             </div>
                         )}
+
                     </div>
 
                             {/* Editor Content + Terminal - Vertical Split with Allotment */}
@@ -395,12 +362,10 @@ export const SectionIntro = () => {
                                                 <EditorSoutenancesJuillet onScrollEnd={handleScrollEnd} />
                                             ) : currentView === 'Soutenances_Septembre.md' ? (
                                                 <EditorSoutenancesSeptembre onScrollEnd={handleScrollEnd} />
-                                            ) : currentView === 'Backstage.md' ? (
-                                                <EditorBackstage onScrollEnd={handleScrollEnd} />
                                             ) : currentView === 'Communion_Cadets.md' ? (
                                                 <EditorCommunion onScrollEnd={handleScrollEnd} />
-                                            ) : currentView === 'PhotoGroupe.md' ? (
-                                                <EditorPhotoGroupe onScrollEnd={handleScrollEnd} />
+                                            ) : currentView === 'BestMoments.md' ? (
+                                                <EditorBestMoments onScrollEnd={handleScrollEnd} />
                                             ) : null}
                                         </div>
                                     </Allotment.Pane>
@@ -425,7 +390,7 @@ export const SectionIntro = () => {
                                                 {currentSection === 9 && (
                                                     <EditorTerminalMentions onScrollEnd={handleScrollEnd} />
                                                 )}
-                                                {currentSection === 17 && (
+                                                {currentSection === 14 && (
                                                     <EditorTerminalClosing />
                                                 )}
                                             </div>
@@ -446,6 +411,15 @@ export const SectionIntro = () => {
                 language={currentView === 'main.ts' ? "TypeScript" : "Markdown"}
                 encoding="UTF-8"
             />
+
+            {/* Debug Button - Skip to Next Section */}
+            <button
+                onClick={goToNextSection}
+                className="fixed bottom-4 right-4 z-50 bg-[#007ACC] hover:bg-[#1177BB] text-white px-4 py-2 rounded-lg shadow-lg font-semibold text-sm transition-all hover:scale-105 active:scale-95"
+                title={`Section ${currentSection}/14 - Click to skip to next`}
+            >
+                ⏭️ Next Section ({currentSection}/14)
+            </button>
                 </div>
     );
 };

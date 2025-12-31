@@ -1,45 +1,53 @@
 "use client";
 
 import React from 'react';
-import { Badge, BadgeGroup } from '@/components/ui/Badge';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+
 
 interface EditorCommunionProps {
     onScrollEnd?: () => void;
 }
 
 export const EditorCommunion = ({ onScrollEnd }: EditorCommunionProps) => {
-    const hasRunRef = React.useRef(false);
+    const [currentSlide, setCurrentSlide] = React.useState(0);
+    const swiperRef = React.useRef<SwiperType | null>(null);
 
-    // Auto-transition after delay
+    // Images from commucadets folder in numerical order (1-7)
+    const images = [
+        { src: "/commucadets/1netoyagedelasalledessoutances.jpg", caption: "Nettoyage de la salle des soutenances", isVideo: false },
+        { src: "/commucadets/2installationdelaphotodelapromoaulabo.jpg", caption: "Installation de la photo de la promo au labo", isVideo: false },
+        { src: "/commucadets/3Mugpourlesenseignants.jpg", caption: "Mug pour les enseignants", isVideo: false },
+        { src: "/commucadets/4porteclescutepourlesenseignants.jpg", caption: "Porte-clés cute pour les enseignants", isVideo: false },
+        { src: "/commucadets/5Seancebillardauretaulacantine.jpg", caption: "Séance billard au restaurant 'La Cantine'", isVideo: false },
+        { src: "/commucadets/6repasbiengarni.jpg", caption: "Repas bien garni", isVideo: false },
+        { src: "/commucadets/7Selfieetgrandssourire.jpg", caption: "Selfie et grands sourires", isVideo: false },
+    ];
+
+    // Auto-transition after last slide - immediate transition
     React.useEffect(() => {
-        if (hasRunRef.current) return;
-        hasRunRef.current = true;
-
-        const timer = setTimeout(() => {
-            if (onScrollEnd) {
+        if (currentSlide === images.length - 1 && onScrollEnd) {
+            const timer = setTimeout(() => {
                 onScrollEnd();
-            }
-        }, 8000); // 8 seconds to read
-
-        return () => clearTimeout(timer);
-    }, [onScrollEnd]);
+            }, 500); // Immediate transition after last image
+            return () => clearTimeout(timer);
+        }
+    }, [currentSlide, images.length, onScrollEnd]);
 
     return (
         <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
-            {/* Header with badges and detailed info */}
+            {/* Header with detailed info */}
             <div className="px-8 py-6 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
-                <h2 className="text-2xl font-bold text-[#CE9178] mb-3">
+                <h2 className="text-2xl font-bold text-[#CE9178] mt-6 mb-3">
                     # Communion avec les Cadets - Passage du Flambeau
                 </h2>
                 
-                {/* Badges */}
-                <BadgeGroup>
-                    <Badge label="type" value="symbolique" colorScheme="orange" />
-                    <Badge label="flambeau" value="transmission" colorScheme="red" />
-                    <Badge label="promotions" value="GI 2025 → 2026" colorScheme="blue" />
-                    <Badge label="lieu" value="Campus ENSPY" colorScheme="gray" />
-                </BadgeGroup>
-
                 {/* Detailed Description */}
                 <div className="space-y-3 text-[#CCCCCC] text-sm leading-relaxed">
                     <p>
@@ -57,59 +65,60 @@ export const EditorCommunion = ({ onScrollEnd }: EditorCommunionProps) => {
                 </div>
             </div>
 
-            {/* Central Content Area */}
-            <div className="flex-1 flex items-center justify-center p-12 overflow-hidden">
-                <div className="max-w-4xl w-full">
-                    {/* Torch passing visual */}
-                    <div className="flex items-center justify-center gap-8 mb-12">
-                        <div className="text-center">
-                            <div className="w-32 h-32 bg-gradient-to-br from-[#569CD6] to-[#4EC9B0] rounded-full flex items-center justify-center mb-4">
-                                <div className="text-5xl">🎓</div>
+            {/* Swiper Carousel */}
+            <div className="flex-1 overflow-hidden relative bg-[#1E1E1E]">
+                <Swiper
+                    direction="vertical"
+                    modules={[Autoplay, Pagination, Navigation]}
+                    autoplay={{
+                        delay: 3000,
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: false,
+                        waitForTransition: true,
+                    }}
+                    pagination={{
+                        clickable: true,
+                        renderBullet: (index, className) => {
+                            return `<span class="${className}" style="background: #CE9178"></span>`;
+                        },
+                    }}
+                    speed={700}
+                    allowTouchMove={false}
+                    preventInteractionOnTransition={true}
+                    onSwiper={(swiper) => {
+                        swiperRef.current = swiper;
+                    }}
+                    onSlideChange={(swiper) => {
+                        setCurrentSlide(swiper.activeIndex);
+                        console.log(`🎬 Swiper Communion: Slide ${swiper.activeIndex + 1}`);
+                    }}
+                    className="w-full h-full"
+                    style={{ height: '100%' }}
+                >
+                    {images.map((item, index) => (
+                        <SwiperSlide key={index}>
+                            <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-[#1E1E1E]">
+                                {/* Image Container */}
+                                <div className="relative w-full max-w-5xl h-[500px] bg-gradient-to-br from-[#252526] to-[#1E1E1E] rounded-lg border-2 border-[#CE9178] flex items-center justify-center overflow-hidden shadow-lg shadow-[#CE9178]/20">
+                                    <img
+                                        src={item.src}
+                                        alt={item.caption}
+                                        className="max-w-full max-h-full object-contain"
+                                        loading={index <= currentSlide + 1 ? "eager" : "lazy"}
+                                        onLoad={() => console.log(`✓ Image ${index + 1} chargée`)}
+                                    />
+                                </div>
+
+                                {/* Caption */}
+                                <div className="mt-6 max-w-5xl w-full">
+                                    <p className="text-[#CCCCCC] text-center text-lg font-light italic">
+                                        {item.caption}
+                                    </p>
+                                </div>
                             </div>
-                            <p className="text-[#CCCCCC] font-bold text-xl">GI 2025</p>
-                            <p className="text-[#858585] text-sm">Les Anciens</p>
-                        </div>
-
-                        <div className="flex flex-col items-center gap-2">
-                            <div className="text-6xl animate-pulse">🔥</div>
-                            <div className="text-4xl text-[#CE9178]">→</div>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="w-32 h-32 bg-gradient-to-br from-[#CE9178] to-[#FFA500] rounded-full flex items-center justify-center mb-4">
-                                <div className="text-5xl">👥</div>
-                            </div>
-                            <p className="text-[#CCCCCC] font-bold text-xl">GI 2026</p>
-                            <p className="text-[#858585] text-sm">Les Cadets</p>
-                        </div>
-                    </div>
-
-                    {/* Quote Block */}
-                    <div className="p-8 bg-gradient-to-br from-[#2D2D30] to-[#1E1E1E] border-2 border-[#CE9178] rounded-lg shadow-2xl shadow-[#CE9178]/20">
-                        <p className="text-[#CCCCCC] text-xl leading-relaxed italic mb-4 text-center">
-                            "Aujourd'hui successeurs, demain mentors. Honorez ce flambeau, faites-nous fiers. L'excellence se transmet."
-                        </p>
-                        <p className="text-[#858585] text-sm text-center">
-                            — Message aux cadets
-                        </p>
-                    </div>
-
-                    {/* Value Cards */}
-                    <div className="grid grid-cols-3 gap-4 mt-8">
-                        <div className="p-4 bg-[#569CD6]/10 border border-[#569CD6] rounded-lg text-center">
-                            <div className="text-3xl mb-2">💪</div>
-                            <div className="text-xs text-[#569CD6] font-bold">Persévérance</div>
-                        </div>
-                        <div className="p-4 bg-[#4EC9B0]/10 border border-[#4EC9B0] rounded-lg text-center">
-                            <div className="text-3xl mb-2">🤝</div>
-                            <div className="text-xs text-[#4EC9B0] font-bold">Solidarité</div>
-                        </div>
-                        <div className="p-4 bg-[#CE9178]/10 border border-[#CE9178] rounded-lg text-center">
-                            <div className="text-3xl mb-2">🎯</div>
-                            <div className="text-xs text-[#CE9178] font-bold">Excellence</div>
-                        </div>
-                    </div>
-                </div>
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
 
             {/* Footer Archive Note */}

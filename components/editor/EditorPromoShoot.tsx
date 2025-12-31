@@ -1,19 +1,15 @@
 "use client";
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
-import { Badge, BadgeGroup } from '@/components/ui/Badge';
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-// Import ReactPlayer dynamically for better performance
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface EditorPromoShootProps {
     onScrollEnd?: () => void;
@@ -23,15 +19,27 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
     const [currentSlide, setCurrentSlide] = React.useState(0);
     const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
     const swiperRef = React.useRef<SwiperType | null>(null);
+    const videoRefs = React.useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
-    // Images/Videos for carousel - Videos first and last
+    // Images/Videos for carousel - Toutes les images d'abord, puis vidéos, recap en dernier
     const images = [
-        { src: "/promo-shoot/videophotodelapromo1.MOV", caption: "Séance photo de la promotion", isVideo: true },
-        { src: "/promo-shoot/photo_2025-12-30_15-03-18.jpg", caption: "Vue d'ensemble - Promotion GI 2025", isVideo: false },
-        { src: "/promo-shoot/photo_2025-12-30_16-12-51.jpg", caption: "Portrait collectif officiel", isVideo: false },
-        { src: "/promo-shoot/photo_2025-12-30_16-13-08.jpg", caption: "Moments de cohésion", isVideo: false },
-        { src: "/promo-shoot/photo_2025-12-30_16-13-10.jpg", caption: "Esprit d'équipe", isVideo: false },
-        { src: "/promo-shoot/photo_2025-12-30_16-13-14.jpg", caption: "Ambiance conviviale", isVideo: false },
+        // Toutes les images d'abord
+        { src: "/promo-shoot/photo_2025-12-30_15-03-18.jpg", caption: "Les Garçons - GI 2025", isVideo: false },
+        { src: "/promo-shoot/photo_2025-12-30_16-12-51.jpg", caption: "Dernier coup de pinceau", isVideo: false },
+        { src: "/promo-shoot/photo_2025-12-30_16-13-14.jpg", caption: "Admirez l'élégance", isVideo: false },
+        { src: "/promo-shoot/lecomitedorganisation.jpg", caption: "Le comité d'organisation", isVideo: false },
+        { src: "/promo-shoot/lesfillesdelapromo.jpg", caption: "Les filles de la promotion", isVideo: false },
+        { src: "/promo-shoot/MBREyespourledroneetlepresidentducomite.jpg", caption: "MBR Eyes pour les drones", isVideo: false },
+        { src: "/promo-shoot/photodeBelleNIckel.jpg", caption: "Photo Indiv", isVideo: false },
+        { src: "/promo-shoot/photodelaTresoriereAmirah.jpg", caption: "Photo Indiv", isVideo: false },
+        { src: "/promo-shoot/photodeYanBelinga.jpg", caption: "Photo Indiv", isVideo: false },
+        { src: "/promo-shoot/selfiedegroupe.jpg", caption: "Selfie de groupe", isVideo: false },
+        { src: "/promo-shoot/thephotographers.jpg", caption: "Les photographes", isVideo: false },
+        // Puis les vidéos (sauf le recap)
+        { src: "/promo-shoot/videophotodelapromo1.MOV", caption: "Petit Défilé", isVideo: true },
+        { src: "/promo-shoot/drone.mp4", caption: "Vue aérienne - Drone de la séance photo", isVideo: true },
+        { src: "/promo-shoot/videosdesprofs.MOV", caption: "Arrivée des enseignants", isVideo: true },
+        // Recap en dernier
         { src: "/promo-shoot/Recap_photodelapromo.mp4", caption: "Récapitulatif de la journée photo", isVideo: true },
     ];
 
@@ -45,7 +53,21 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
             // Stop autoplay for videos
             swiperRef.current.autoplay.stop();
             setIsVideoPlaying(true);
+            
+            // Play the current video
+            const video = videoRefs.current[currentSlide];
+            if (video) {
+                video.play().catch(err => {
+                    console.warn('Erreur lecture vidéo:', err);
+                });
+            }
         } else {
+            // Pause all videos when showing images
+            Object.values(videoRefs.current).forEach(video => {
+                if (video && !video.paused) {
+                    video.pause();
+                }
+            });
             // Resume autoplay for images
             console.log(`Image ${currentSlide + 1} - autoplay actif`);
             swiperRef.current.autoplay.start();
@@ -54,16 +76,30 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
     }, [currentSlide, images]);
 
     // Handle video end callback
-    const handleVideoEnd = () => {
-        console.log(`✓ Vidéo ${currentSlide + 1} terminée`);
+    const handleVideoEnd = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+        const video = e.currentTarget;
+        const currentTime = video.currentTime;
+        const duration = video.duration;
         
+        console.log(`✓ Vidéo ${currentSlide + 1} terminée - Temps: ${currentTime.toFixed(2)}s / ${duration.toFixed(2)}s`);
+        
+        // Pour la vidéo de recap (dernière), s'assurer qu'elle est vraiment terminée
         if (currentSlide === images.length - 1) {
-            // Last video - trigger next section
-            console.log('Dernière vidéo - passage à la section suivante');
+            // Vérifier que la vidéo a vraiment atteint la fin (à 0.1s près)
+            if (duration > 0 && Math.abs(currentTime - duration) > 0.1) {
+                console.warn('Recap vidéo pas encore à la fin, attente...');
+                // Forcer la vidéo à aller jusqu'au bout
+                video.currentTime = duration;
+                return;
+            }
+            
+            // Last video (recap) - trigger next section after a longer delay
+            console.log('Dernière vidéo (Recap) terminée - passage à la section suivante');
             if (onScrollEnd) {
+                // Délai plus long pour la vidéo de recap
                 setTimeout(() => {
                     onScrollEnd();
-                }, 2000);
+                }, 3000);
             }
         } else {
             // Move to next slide
@@ -76,13 +112,10 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
     const handleSlideClick = () => {
         // Don't allow skipping during video playback
         const currentImage = images[currentSlide];
-        if (currentImage?.isVideo) {
-            const videoElement = videoRefs.current[currentSlide];
-            if (videoElement && !videoElement.paused && !videoElement.ended) {
-                // Video is playing, don't skip
-                console.log('⏸ Vidéo en cours, attendez la fin');
-                return;
-            }
+        if (currentImage?.isVideo && isVideoPlaying) {
+            // Video is playing, don't skip
+            console.log('⏸ Vidéo en cours, attendez la fin');
+            return;
         }
         
         // Allow navigation for images or finished videos
@@ -93,20 +126,12 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
 
     return (
         <div className="flex-1 flex flex-col bg-[#1E1E1E] overflow-hidden h-full w-full">
-            {/* Header with badges and detailed info */}
+            {/* Header with detailed info */}
             <div className="px-8 py-6 border-b border-[#3C3C3C] bg-[#252526] flex-shrink-0">
-                <h2 className="text-2xl font-bold text-[#00FFFF] mb-3">
+                <h2 className="text-2xl font-bold text-[#00FFFF] mt-6 mb-3">
                     # Séance Photo Officielle - Promotion GI 2025
                 </h2>
                 
-                {/* Badges */}
-                <BadgeGroup>
-                    <Badge label="participants" value="70" colorScheme="green" />
-                    <Badge label="photos" value="120+" colorScheme="blue" />
-                    <Badge label="vidéos" value="15" colorScheme="red" />
-                    <Badge label="durée" value="4h" colorScheme="orange" />
-                    <Badge label="lieu" value="Campus ENSPY" colorScheme="gray" />
-                </BadgeGroup>
 
                 {/* Detailed Description */}
                 <div className="space-y-3 text-[#CCCCCC] text-sm leading-relaxed">
@@ -161,33 +186,51 @@ export const EditorPromoShoot = ({ onScrollEnd }: EditorPromoShootProps) => {
                                 {/* Image/Video Container */}
                                 <div className="relative w-full max-w-5xl h-[500px] bg-gradient-to-br from-[#252526] to-[#1E1E1E] rounded-lg border-2 border-[#00FFFF] flex items-center justify-center overflow-hidden shadow-lg shadow-[#00FFFF]/20">
                                     {image.isVideo ? (
-                                        <ReactPlayer
-                                            url={image.src}
-                                            playing={index === currentSlide && isVideoPlaying}
+                                        <video
+                                            ref={(el) => {
+                                                videoRefs.current[index] = el;
+                                            }}
+                                            src={image.src}
+                                            className="w-full h-full object-contain"
+                                            playsInline
+                                            preload="auto"
                                             onEnded={handleVideoEnd}
-                                            onReady={() => console.log(`✓ Vidéo ${index + 1} chargée`)}
-                                            width="100%"
-                                            height="100%"
-                                            style={{ maxWidth: '100%', maxHeight: '100%' }}
-                                            config={{
-                                                file: {
-                                                    attributes: {
-                                                        playsInline: true,
-                                                        controlsList: 'nodownload',
-                                                        disablePictureInPicture: true,
+                                            onLoadedData={() => {
+                                                const video = videoRefs.current[index];
+                                                if (video) {
+                                                    console.log(`✓ Vidéo ${index + 1} chargée - Durée: ${video.duration.toFixed(2)}s`);
+                                                }
+                                            }}
+                                            onTimeUpdate={(e) => {
+                                                // Pour debug: afficher la progression de la vidéo de recap
+                                                if (index === images.length - 1) {
+                                                    const video = e.currentTarget;
+                                                    const progress = (video.currentTime / video.duration) * 100;
+                                                    if (progress > 90) {
+                                                        console.log(`Recap vidéo: ${progress.toFixed(1)}% - ${video.currentTime.toFixed(2)}s / ${video.duration.toFixed(2)}s`);
                                                     }
                                                 }
                                             }}
-                                            volume={1}
-                                            muted={false}
-                                            controls={false}
-                                            playsinline
+                                            onWaiting={(e) => {
+                                                // Si la vidéo attend du contenu, ne pas déclencher onEnded
+                                                console.log(`Vidéo ${index + 1} en attente de chargement...`);
+                                            }}
+                                            onCanPlayThrough={(e) => {
+                                                // Vidéo complètement chargée et prête à jouer
+                                                const video = e.currentTarget;
+                                                console.log(`Vidéo ${index + 1} prête - Durée complète: ${video.duration.toFixed(2)}s`);
+                                            }}
+                                            onError={(e) => {
+                                                console.error(`Erreur vidéo ${index + 1}:`, e);
+                                            }}
+                                            style={{ maxWidth: '100%', maxHeight: '100%' }}
                                         />
                                     ) : (
                                         <img
                                             src={image.src}
                                             alt={image.caption}
                                             className="max-w-full max-h-full object-contain"
+                                            loading={index <= currentSlide + 1 ? "eager" : "lazy"}
                                             onLoad={() => console.log(`✓ Image ${index + 1} chargée`)}
                                         />
                                     )}

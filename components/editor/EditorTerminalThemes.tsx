@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { EditorCursor } from './EditorCursor';
+import { getTerminalSoundManager } from "@/lib/terminalSounds";
 
 interface EditorTerminalThemesProps {
     onScrollEnd?: () => void;
@@ -27,15 +28,18 @@ export const EditorTerminalThemes = ({ onScrollEnd }: EditorTerminalThemesProps)
         hasRunRef.current = true;
 
         const runAnalysis = async () => {
-            const addToHistory = (text: string, color?: string, className?: string) => 
+            const soundManager = getTerminalSoundManager();
+            const addToHistory = (text: string, color?: string, className?: string) => {
                 setHistory(prev => [...prev, { text, color, className }]);
+                soundManager.playRandomSound();
+            };
 
             // Header
             addToHistory(">>> PROJECT_ANALYSIS_INITIATED", "#FF00FF");
             await new Promise(r => setTimeout(r, 200));
             
             addToHistory("");
-            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#FF00FF");
+            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#FF00FF");
             addToHistory("");
             await new Promise(r => setTimeout(r, 150));
 
@@ -57,11 +61,12 @@ export const EditorTerminalThemes = ({ onScrollEnd }: EditorTerminalThemesProps)
                     };
                     return newHist;
                 });
+                soundManager.playOnSystemCheck();
             }
             
             await new Promise(r => setTimeout(r, 400));
             addToHistory("");
-            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FFFF");
+            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FFFF");
             addToHistory("");
             await new Promise(r => setTimeout(r, 200));
 
@@ -98,7 +103,7 @@ export const EditorTerminalThemes = ({ onScrollEnd }: EditorTerminalThemesProps)
             await new Promise(r => setTimeout(r, 400));
 
             addToHistory("");
-            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#FF00FF");
+            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#FF00FF");
             addToHistory("");
             await new Promise(r => setTimeout(r, 200));
 
@@ -147,6 +152,7 @@ export const EditorTerminalThemes = ({ onScrollEnd }: EditorTerminalThemesProps)
                             return newHist;
                         });
                     }
+                    soundManager.playOnGlitch();
                     await new Promise(r => setTimeout(r, 100));
                 }
                 
@@ -155,7 +161,7 @@ export const EditorTerminalThemes = ({ onScrollEnd }: EditorTerminalThemesProps)
             }
 
             await new Promise(r => setTimeout(r, 300));
-            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FF00");
+            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FF00");
             addToHistory("");
             await new Promise(r => setTimeout(r, 200));
 
@@ -168,7 +174,7 @@ export const EditorTerminalThemes = ({ onScrollEnd }: EditorTerminalThemesProps)
             await new Promise(r => setTimeout(r, 300));
 
             addToHistory("");
-            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FF00");
+            addToHistory("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", "#00FF00");
             addToHistory("");
             await new Promise(r => setTimeout(r, 200));
 
@@ -177,8 +183,8 @@ export const EditorTerminalThemes = ({ onScrollEnd }: EditorTerminalThemesProps)
 
             setIsAnalyzing(false);
 
-            // Auto-transition after 5 seconds
-            await new Promise(r => setTimeout(r, 5000));
+            // Auto-transition after 8 seconds (increased from 5)
+            await new Promise(r => setTimeout(r, 8000));
             if (onScrollEndRef.current) {
                 console.log('✓ Themes analysis complete - Auto-transition to next section');
                 onScrollEndRef.current();

@@ -1,96 +1,96 @@
 export const TOP_TENUES_FEMMES = [
     {
         rank: 1,
-        title: "Élégance Professionnelle",
-        description: "Tailleur impeccable et présentation soignée qui a marqué les esprits lors de la soutenance.",
+        title: "Amirah - Tradition & Allure Royale",
+        description: "Wax bleu et doré avec gele XXL : tradition forte, allure royale.",
         author: "GI25 • Soutenances 2025",
         rating: 5.0,
         downloads: "70 vues",
-        image: "/images/top-femmes-1.jpg" // À remplacer par vraies images
+        image: "/topgirls/1Amirah.jpg"
     },
     {
         rank: 2,
-        title: "Style Académique Raffiné",
-        description: "Ensemble sobre et distingué, parfait équilibre entre formalité et modernité.",
+        title: "Ymelda - Afro-Moderne Fluide",
+        description: "Robe afro-moderne fluide : sobre, stylée, efficace.",
         author: "GI25 • Soutenances 2025",
         rating: 4.9,
         downloads: "68 vues",
-        image: "/images/top-femmes-2.jpg"
+        image: "/topgirls/2Ymelda.jpg"
     },
     {
         rank: 3,
-        title: "Charme & Confiance",
-        description: "Look élégant et assuré qui a su captiver le jury et l'audience.",
+        title: "Eliane - Élégance Professionnelle",
+        description: "Tailleur crème structuré : élégance pro, aura leader.",
         author: "GI25 • Soutenances 2025",
         rating: 4.8,
         downloads: "65 vues",
-        image: "/images/top-femmes-3.jpg"
+        image: "/topgirls/3Eliane.jpg"
     },
     {
         rank: 4,
-        title: "Sophistication Moderne",
-        description: "Tenue contemporaine alliant professionnalisme et touche personnelle unique.",
+        title: "Lea - Chic Naturel",
+        description: "Robe satin caramel : chic naturel, présence centrale.",
         author: "GI25 • Soutenances 2025",
         rating: 4.7,
         downloads: "62 vues",
-        image: "/images/top-femmes-4.jpg"
+        image: "/topgirls/4Lea.jpg"
     },
     {
         rank: 5,
-        title: "Classe Intemporelle",
-        description: "Style classique et indémodable, témoignant d'un goût sûr et raffiné.",
+        title: "Hilary - Simplicité & Confiance",
+        description: "Ensemble gris académique : simplicité, confiance, avenir sûr.",
         author: "GI25 • Soutenances 2025",
         rating: 4.6,
         downloads: "60 vues",
-        image: "/images/top-femmes-5.jpg"
+        image: "/topgirls/5Hilary.jpg"
     }
 ];
 
 export const TOP_TENUES_HOMMES = [
     {
         rank: 1,
-        title: "Costume Trois-Pièces Parfait",
-        description: "Élégance masculine absolue avec un costume impeccablement ajusté et une cravate assortie.",
+        title: "Marco - Maîtrise Totale",
+        description: "Robe bleu nuit ajustée : sobre, élégante, maîtrise totale.",
         author: "GI25 • Soutenances 2025",
         rating: 5.0,
         downloads: "70 vues",
-        image: "/images/top-hommes-1.jpg"
+        image: "/topboys/1Marco.jpg"
     },
     {
         rank: 2,
-        title: "Look Business Premium",
-        description: "Costume sobre et professionnel, incarnation parfaite du futur ingénieur.",
+        title: "Lashu - Classique Fort",
+        description: "Costume noir, cravate rouge : classique fort, regard sérieux.",
         author: "GI25 • Soutenances 2025",
         rating: 4.9,
         downloads: "67 vues",
-        image: "/images/top-hommes-2.jpg"
+        image: "/topboys/2Lashu.jpg"
     },
     {
         rank: 3,
-        title: "Style Corporate Moderne",
-        description: "Mélange réussi entre tradition et modernité, avec des détails qui font la différence.",
+        title: "Kimaka - Style Royal",
+        description: "Tenue noire à détails dorés : style royal, présence calme.",
         author: "GI25 • Soutenances 2025",
         rating: 4.8,
         downloads: "64 vues",
-        image: "/images/top-hommes-3.jpg"
+        image: "/topboys/3Kimaka.jpg"
     },
     {
         rank: 4,
-        title: "Distinction & Prestance",
-        description: "Présentation soignée et posture assurée, un ensemble qui commande le respect.",
+        title: "Bachirou - Tradition Assumée",
+        description: "Boubou bleu clair moderne : tradition assumée, vibe fraîche.",
         author: "GI25 • Soutenances 2025",
         rating: 4.7,
         downloads: "61 vues",
-        image: "/images/top-hommes-4.jpg"
+        image: "/topboys/4bACHIROU.jpg"
     },
     {
         rank: 5,
-        title: "Élégance Minimaliste",
-        description: "Less is more : un look épuré mais percutant, preuve d'un style affirmé.",
+        title: "Valdez - Simple & Sharp",
+        description: "Costume bleu bien taillé : simple, sharp, confiant.",
         author: "GI25 • Soutenances 2025",
         rating: 4.6,
         downloads: "58 vues",
-        image: "/images/top-hommes-5.jpg"
+        image: "/topboys/5Valdez.jpg"
     }
 ];
 
@@ -134,8 +134,8 @@ export const MOMENTS_ICONIQUES = [
     {
         rank: 5,
         title: "Sortie de Promo Mémorable",
-        description: "Moments de joie et de complicité lors de la sortie de février.",
-        author: "GI25 • Février 2025",
+        description: "Moments de joie et de complicité lors de la sortie de janvier.",
+        author: "GI25 • Janvier 2025",
         rating: 4.6,
         downloads: "63 vues",
         image: "/images/moment-5.jpg"
@@ -183,7 +183,7 @@ export const HIGHLIGHTS_FINAUX = [
         rank: 5,
         title: "La Sortie de Promo",
         description: "Moment de détente et de complicité avant la tempête des soutenances.",
-        author: "GI25 • Février 2025",
+        author: "GI25 • Janvier 2025",
         rating: 4.8,
         downloads: "70 vues",
         image: "/images/highlight-5.jpg"
